@@ -177,13 +177,34 @@ function __adobeAppFolders(appNamePrefix) {
   if (!base.exists) return [];
 
   var found = [];
-  var subs = base.getFiles(function(f) { return f instanceof Folder; });
+  // On macOS an .app bundle may be classified as File rather than Folder by
+  // ExtendScript — match by name too, or bare-bundle installs (e.g.
+  // "/Applications/Adobe Premiere Pro (Beta).app") are invisible.
+  var subs = base.getFiles(function(f) { return f instanceof Folder || /\\.app$/i.test(f.name); });
   for (var i = 0; i < subs.length; i++) {
     if (subs[i].displayName.indexOf(appNamePrefix) === 0) found.push(subs[i]);
   }
   // Newest version first, so a 2026 preset wins over a stale 2024 one.
   found.sort(function(a, b) { return a.displayName < b.displayName ? 1 : -1; });
   return found;
+}
+
+// macOS keeps app resources INSIDE the bundle ("<install>/<Name>.app/Contents/…"
+// or the bundle sits directly in /Applications); the bare "<install>/MediaIO/…"
+// layout only exists on Windows. Return every plausible content root so preset
+// discovery works on both. (Root cause of frame export failing on every Mac:
+// the walker only tried the Windows layout.)
+function __appContentRoots(installFolder) {
+  var roots = [installFolder.fsName];
+  if (__isMacOS()) {
+    if (/\\.app$/i.test(installFolder.fsName)) {
+      roots.push(installFolder.fsName + "/Contents");
+    } else {
+      var bundles = installFolder.getFiles(function (f) { return /\\.app$/i.test(f.name); });
+      for (var b = 0; b < bundles.length; b++) roots.push(bundles[b].fsName + "/Contents");
+    }
+  }
+  return roots;
 }
 
 function __collectEprFiles(folder, out) {
@@ -203,12 +224,18 @@ function __collectAllPresets() {
 
   var ame = __adobeAppFolders("Adobe Media Encoder");
   for (var i = 0; i < ame.length; i++) {
-    roots.push(new Folder(ame[i].fsName + "/MediaIO/systempresets"));
+    var ameRoots = __appContentRoots(ame[i]);
+    for (var ri = 0; ri < ameRoots.length; ri++) {
+      roots.push(new Folder(ameRoots[ri] + "/MediaIO/systempresets"));
+    }
   }
 
   var ppro = __adobeAppFolders("Adobe Premiere Pro");
   for (var j = 0; j < ppro.length; j++) {
-    roots.push(new Folder(ppro[j].fsName + "/Settings/IngestPresets"));
+    var pproRoots = __appContentRoots(ppro[j]);
+    for (var rj = 0; rj < pproRoots.length; rj++) {
+      roots.push(new Folder(pproRoots[rj] + "/Settings/IngestPresets"));
+    }
   }
 
   // User-saved presets live under the Documents tree on both platforms.
@@ -257,11 +284,14 @@ function __findH264Preset() {
 function __findProxyPreset() {
   var ppro = __adobeAppFolders("Adobe Premiere Pro");
   for (var i = 0; i < ppro.length; i++) {
-    var proxyDir = new Folder(ppro[i].fsName + "/Settings/IngestPresets/Proxy");
-    var eprs = __collectEprFiles(proxyDir, []);
-    if (eprs.length) {
-      eprs.sort(function(a, b) { return a.displayName < b.displayName ? -1 : 1; });
-      return eprs[0].fsName;
+    var pproRoots = __appContentRoots(ppro[i]);
+    for (var r = 0; r < pproRoots.length; r++) {
+      var proxyDir = new Folder(pproRoots[r] + "/Settings/IngestPresets/Proxy");
+      var eprs = __collectEprFiles(proxyDir, []);
+      if (eprs.length) {
+        eprs.sort(function(a, b) { return a.displayName < b.displayName ? -1 : 1; });
+        return eprs[0].fsName;
+      }
     }
   }
   return "";
@@ -448,6 +478,42 @@ function __jsonStringify(obj) {
     return "{" + parts.join(",") + "}";
   }
   return String(obj);
+}
+
+// === Honest-write verification helpers ===
+// Write tools must never report success they haven't observed. These capture a
+// track's clip population before a mutation so the tool can report exactly what
+// appeared (or error when nothing did). Added 2026-08-01 after live sessions on
+// Premiere 26.5 showed razor/insert/overwrite/move success reports were
+// fabricated while the underlying calls silently no-opped.
+
+function __trackClipIds(track) {
+  var ids = [];
+  for (var c = 0; c < track.clips.numItems; c++) ids.push(track.clips[c].nodeId);
+  return ids;
+}
+
+function __clipGeometry(clip) {
+  return {
+    nodeId: clip.nodeId,
+    name: clip.name,
+    start: __ticksToSeconds(clip.start.ticks),
+    end: __ticksToSeconds(clip.end.ticks),
+    duration: __ticksToSeconds(clip.duration.ticks),
+    inPoint: __ticksToSeconds(clip.inPoint.ticks),
+    outPoint: __ticksToSeconds(clip.outPoint.ticks)
+  };
+}
+
+function __newClipsOnTrack(track, beforeIds) {
+  var seen = {};
+  for (var i = 0; i < beforeIds.length; i++) seen[beforeIds[i]] = 1;
+  var fresh = [];
+  for (var c = 0; c < track.clips.numItems; c++) {
+    var clip = track.clips[c];
+    if (!seen[clip.nodeId]) fresh.push(__clipGeometry(clip));
+  }
+  return fresh;
 }
 
 function __result(data) {

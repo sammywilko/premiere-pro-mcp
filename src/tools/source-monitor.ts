@@ -117,10 +117,22 @@ export function getSourceMonitorTools(bridgeOptions: BridgeOptions) {
           var item = app.sourceMonitor.getProjectItem();
           if (!item) return __error("No clip open in Source Monitor");
 
+          if (${vTrack} >= seq.videoTracks.numTracks) return __error("Video track index ${vTrack} out of range");
+          var vT = seq.videoTracks[${vTrack}];
+          var aT = ${aTrack} < seq.audioTracks.numTracks ? seq.audioTracks[${aTrack}] : null;
+          var vBefore = __trackClipIds(vT);
+          var aBefore = aT ? __trackClipIds(aT) : [];
+
           var pos = seq.getPlayerPosition().ticks;
           seq.insertClip(item, pos, ${vTrack}, ${aTrack});
 
-          return __result({ inserted: true, item: item.name, atSeconds: __ticksToSeconds(pos) });
+          var newVideo = __newClipsOnTrack(vT, vBefore);
+          var newAudio = aT ? __newClipsOnTrack(aT, aBefore) : [];
+          if (newVideo.length === 0 && newAudio.length === 0) {
+            return __error("insertClip ran but no new clip appeared on the target tracks — nothing landed. Check that a range is marked in the Source Monitor and the track indices are right.");
+          }
+
+          return __result({ inserted: true, verified: true, item: item.name, atSeconds: __ticksToSeconds(pos), newClips: { video: newVideo, audio: newAudio } });
         `);
         return sendCommand(script, bridgeOptions);
       },
@@ -151,10 +163,22 @@ export function getSourceMonitorTools(bridgeOptions: BridgeOptions) {
           var item = app.sourceMonitor.getProjectItem();
           if (!item) return __error("No clip open in Source Monitor");
 
+          if (${vTrack} >= seq.videoTracks.numTracks) return __error("Video track index ${vTrack} out of range");
+          var vT = seq.videoTracks[${vTrack}];
+          var aT = ${aTrack} < seq.audioTracks.numTracks ? seq.audioTracks[${aTrack}] : null;
+          var vBefore = __trackClipIds(vT);
+          var aBefore = aT ? __trackClipIds(aT) : [];
+
           var pos = seq.getPlayerPosition().ticks;
           seq.overwriteClip(item, pos, ${vTrack}, ${aTrack});
 
-          return __result({ overwritten: true, item: item.name, atSeconds: __ticksToSeconds(pos) });
+          var newVideo = __newClipsOnTrack(vT, vBefore);
+          var newAudio = aT ? __newClipsOnTrack(aT, aBefore) : [];
+          if (newVideo.length === 0 && newAudio.length === 0) {
+            return __error("overwriteClip ran but no new clip appeared on the target tracks — nothing landed. Check that a range is marked in the Source Monitor and the track indices are right.");
+          }
+
+          return __result({ overwritten: true, verified: true, item: item.name, atSeconds: __ticksToSeconds(pos), newClips: { video: newVideo, audio: newAudio } });
         `);
         return sendCommand(script, bridgeOptions);
       },

@@ -35,18 +35,33 @@ export function getTimelineTools(bridgeOptions: BridgeOptions) {
         const script = buildToolScript(`
           var seq = app.project.activeSequence;
           if (!seq) return __error("No active sequence");
-          
+
           var item = __findProjectItem("${escapeForExtendScript(args.item_id)}");
           if (!item) return __error("Project item not found: ${escapeForExtendScript(args.item_id)}");
-          
+          if (${trackIndex} >= seq.videoTracks.numTracks) return __error("Video track index ${trackIndex} out of range");
+
+          var vTrack = seq.videoTracks[${trackIndex}];
+          var aTrack = ${audioTrackIndex} < seq.audioTracks.numTracks ? seq.audioTracks[${audioTrackIndex}] : null;
+          var vBefore = __trackClipIds(vTrack);
+          var aBefore = aTrack ? __trackClipIds(aTrack) : [];
+
           var startTicks = __secondsToTicks(${startSeconds}).toString();
           seq.insertClip(item, startTicks, ${trackIndex}, ${audioTrackIndex});
-          
+
+          var newVideo = __newClipsOnTrack(vTrack, vBefore);
+          var newAudio = aTrack ? __newClipsOnTrack(aTrack, aBefore) : [];
+          if (newVideo.length === 0 && newAudio.length === 0) {
+            return __error("insertClip ran but no new clip appeared on video track ${trackIndex} / audio track ${audioTrackIndex} — nothing was added.");
+          }
+
           return __result({
             added: true,
+            verified: true,
             item: item.name,
             trackIndex: ${trackIndex},
-            startSeconds: ${startSeconds}
+            startSeconds: ${startSeconds},
+            newClips: { video: newVideo, audio: newAudio },
+            note: "Insert semantics: adding inside an existing clip splits it and ripples the tail; the split tail also appears in newClips."
           });
         `);
         return sendCommand(script, bridgeOptions);
@@ -73,10 +88,15 @@ export function getTimelineTools(bridgeOptions: BridgeOptions) {
         const script = buildToolScript(`
           var result = __findClip("${escapeForExtendScript(args.node_id)}");
           if (!result) return __error("Clip not found: ${escapeForExtendScript(args.node_id)}");
-          
+
           var clip = result.clip;
+          var clipName = clip.name;
           clip.remove(${args.ripple ? "true" : "false"}, ${args.ripple ? "true" : "false"});
-          return __result({ removed: true, clipName: clip.name });
+
+          if (__findClip("${escapeForExtendScript(args.node_id)}")) {
+            return __error("remove() ran but the clip is still on the timeline — nothing was removed.");
+          }
+          return __result({ removed: true, verified: true, clipName: clipName });
         `);
         return sendCommand(script, bridgeOptions);
       },
@@ -106,24 +126,49 @@ export function getTimelineTools(bridgeOptions: BridgeOptions) {
         const script = buildToolScript(`
           var result = __findClip("${escapeForExtendScript(args.node_id)}");
           if (!result) return __error("Clip not found: ${escapeForExtendScript(args.node_id)}");
-          
+
           var clip = result.clip;
+          var before = __clipGeometry(clip);
+          var beforeStartTicks = clip.start.ticks;
           var newStartTicks = __secondsToTicks(${args.new_start_seconds}).toString();
+
+          if (Math.abs(before.start - ${args.new_start_seconds}) < 0.0005) {
+            return __result({ moved: false, verified: true, clipName: clip.name, note: "Clip already starts at the requested time; nothing to do.", geometry: before });
+          }
+
           clip.start = newStartTicks;
-          
+
+          // A real move shifts the whole clip: start hits the target, end follows,
+          // duration is invariant. On builds where the DOM merely accepts the start
+          // write without moving the clip (observed live on 26.5), end/duration
+          // don't follow — restore the property so reads aren't poisoned, and fail.
+          var after = __clipGeometry(clip);
+          var startOk = Math.abs(after.start - ${args.new_start_seconds}) < 0.0005;
+          var durationOk = Math.abs(after.duration - before.duration) < 0.0005;
+          var endFollowed = Math.abs((after.end - before.end) - (after.start - before.start)) < 0.0005;
+
+          if (!startOk || !durationOk || !endFollowed) {
+            clip.start = beforeStartTicks;
+            return __error("move_clip cannot move clips on this Premiere build: the DOM accepted the start write without moving the clip (end/duration did not follow). The start property has been restored so timeline reads stay truthful. Land clips at their final position instead (e.g. overwrite_from_source), or move them in the UI.");
+          }
+
           ${args.new_track_index !== undefined ? `
-          // Move to different track if specified
           var seq = app.project.activeSequence;
           var targetTracks = result.trackType === "video" ? seq.videoTracks : seq.audioTracks;
-          if (${args.new_track_index} < targetTracks.numTracks) {
-            clip.moveToTrack(targetTracks[${args.new_track_index}]);
+          if (${args.new_track_index} >= targetTracks.numTracks) return __error("Target track index ${args.new_track_index} out of range (start-time move already applied and verified)");
+          clip.moveToTrack(targetTracks[${args.new_track_index}]);
+          var relocated = __findClip("${escapeForExtendScript(args.node_id)}");
+          if (!relocated || relocated.trackIndex !== ${args.new_track_index}) {
+            return __error("Start-time move applied and verified, but moveToTrack did not land the clip on track ${args.new_track_index} (clip is on track " + (relocated ? relocated.trackIndex : "unknown") + ").");
           }
           ` : ""}
-          
+
           return __result({
             moved: true,
+            verified: true,
             clipName: clip.name,
-            newStart: ${args.new_start_seconds}
+            before: before,
+            after: __clipGeometry(clip)
           });
         `);
         return sendCommand(script, bridgeOptions);
@@ -154,16 +199,36 @@ export function getTimelineTools(bridgeOptions: BridgeOptions) {
         const script = buildToolScript(`
           var result = __findClip("${escapeForExtendScript(args.node_id)}");
           if (!result) return __error("Clip not found: ${escapeForExtendScript(args.node_id)}");
-          
+
           var clip = result.clip;
+          var before = __clipGeometry(clip);
+          var beforeInTicks = clip.inPoint.ticks;
+          var beforeOutTicks = clip.outPoint.ticks;
+
           ${args.new_in_seconds !== undefined ? `clip.inPoint = __secondsToTicks(${args.new_in_seconds}).toString();` : ""}
           ${args.new_out_seconds !== undefined ? `clip.outPoint = __secondsToTicks(${args.new_out_seconds}).toString();` : ""}
-          
+
+          var after = __clipGeometry(clip);
+          var sourceChanged = Math.abs(after.inPoint - before.inPoint) > 0.0005 || Math.abs(after.outPoint - before.outPoint) > 0.0005;
+          var footprintChanged = Math.abs(after.start - before.start) > 0.0005 || Math.abs(after.end - before.end) > 0.0005;
+
+          if (!sourceChanged && !footprintChanged) {
+            return __error("trim wrote nothing — neither the source range nor the timeline footprint changed.");
+          }
+          if (!footprintChanged) {
+            // Source metadata moved but the cut did not (observed on stills on
+            // 26.5). A half-landed write is worse than none — restore it.
+            clip.inPoint = beforeInTicks;
+            clip.outPoint = beforeOutTicks;
+            return __error("trim updated the clip's source range but the timeline cut did not move (known behaviour for stills on this build). The source range has been restored; nothing changed. To change a still's timeline length, land it at the desired duration instead (overwrite_from_source with a source in/out).");
+          }
+
           return __result({
             trimmed: true,
+            verified: true,
             clipName: clip.name,
-            inPoint: __ticksToSeconds(clip.inPoint.ticks),
-            outPoint: __ticksToSeconds(clip.outPoint.ticks)
+            before: before,
+            after: after
           });
         `);
         return sendCommand(script, bridgeOptions);
@@ -468,16 +533,44 @@ export function getTimelineTools(bridgeOptions: BridgeOptions) {
           app.enableQE();
           var qeSeq = qe.project.getActiveSequence();
           if (!qeSeq) return __error("No active sequence (QE)");
-          
+
           var result = __findClip("${escapeForExtendScript(args.node_id)}");
           if (!result) return __error("Clip not found");
-          
+
           var clip = result.clip;
+          var before = __clipGeometry(clip);
+          var beforeSpeed = null;
+          try { beforeSpeed = clip.getSpeed(); } catch(e) {}
+
           var speed = "${args.speed_percent}";
           ${args.reverse ? 'speed = "-" + speed;' : ""}
-          
           clip.setSpeed(speed);
-          return __result({ speedChanged: true, clipName: clip.name, speed: ${args.speed_percent}, reverse: ${!!args.reverse} });
+
+          var after = __clipGeometry(clip);
+          var afterSpeed = null;
+          try { afterSpeed = clip.getSpeed(); } catch(e) {}
+          var reversedNow = null;
+          try { reversedNow = clip.isSpeedReversed() == 1; } catch(e) {}
+
+          var speedMoved = beforeSpeed !== null && afterSpeed !== null && Math.abs(afterSpeed - beforeSpeed) > 0.0001;
+          var durationMoved = Math.abs(after.duration - before.duration) > 0.0005;
+          var alreadyThere = beforeSpeed !== null && (Math.abs(beforeSpeed - ${args.speed_percent}) < 0.01 || Math.abs(beforeSpeed - ${args.speed_percent} / 100) < 0.0001);
+
+          if (!speedMoved && !durationMoved && !alreadyThere) {
+            return __error("setSpeed ran but neither the clip's speed (getSpeed: " + beforeSpeed + " -> " + afterSpeed + ") nor its duration changed — nothing was applied.");
+          }
+
+          return __result({
+            speedChanged: true,
+            verified: true,
+            clipName: clip.name,
+            requestedPercent: ${args.speed_percent},
+            reverse: ${!!args.reverse},
+            observedSpeed: afterSpeed,
+            observedReversed: reversedNow,
+            before: before,
+            after: after
+          });
         `);
         return sendCommand(script, bridgeOptions);
       },

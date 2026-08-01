@@ -231,10 +231,21 @@ export function getClipboardTools(bridgeOptions: BridgeOptions) {
           if (!qeEffect) return __error("Effect not found: " + effectName);
 
           var applied = 0;
+          var attempted = 0;
+          var landed = [];
+          var failedClips = [];
           var target = "${args.target}";
 
+          // The QE apply call "succeeds" for ANY name including nonsense (the QE
+          // registry is empty on 26.x, verified live) — an application only counts
+          // if the clip's DOM component count actually increased.
           function applyToClip(trackIdx, clipIdx, trackType) {
+            attempted++;
             try {
+              var domTrack = trackType === "video" ? seq.videoTracks[trackIdx] : seq.audioTracks[trackIdx];
+              var domClip = domTrack.clips[clipIdx];
+              var countBefore = domClip.components ? domClip.components.numItems : -1;
+
               var qeTrack = trackType === "video" ? qeSeq.getVideoTrackAt(trackIdx) : qeSeq.getAudioTrackAt(trackIdx);
               var qeClip = qeTrack.getItemAt(clipIdx);
               if (isAudio || trackType === "audio") {
@@ -242,8 +253,24 @@ export function getClipboardTools(bridgeOptions: BridgeOptions) {
               } else {
                 qeClip.addVideoEffect(qeEffect);
               }
-              applied++;
-            } catch(e) {}
+
+              var countAfter = domClip.components ? domClip.components.numItems : -1;
+              if (countBefore >= 0 && countAfter > countBefore) {
+                applied++;
+                var comp = domClip.components[countAfter - 1];
+                landed.push({
+                  trackType: trackType,
+                  trackIndex: trackIdx,
+                  clipIndex: clipIdx,
+                  nodeId: domClip.nodeId,
+                  component: { displayName: comp.displayName, matchName: comp.matchName }
+                });
+              } else {
+                failedClips.push({ trackType: trackType, trackIndex: trackIdx, clipIndex: clipIdx, nodeId: domClip.nodeId });
+              }
+            } catch(e) {
+              failedClips.push({ trackType: trackType, trackIndex: trackIdx, clipIndex: clipIdx, error: e.toString() });
+            }
           }
 
           if (target === "selected") {
@@ -274,7 +301,13 @@ export function getClipboardTools(bridgeOptions: BridgeOptions) {
             }
           }
 
-          return __result({ applied: applied, effect: effectName, target: target });
+          if (attempted === 0) {
+            return __error("No clips matched the target '" + target + "' — nothing to apply to.");
+          }
+          if (applied === 0) {
+            return __error("Effect '" + effectName + "' landed on none of the " + attempted + " targeted clip(s). Premiere resolves effects by EXACT display name with no fuzzy matching, and misses are silent. Check the live name via get_effect_properties / list_clip_effects on a clip that has the effect (26.5 rebuilt several effects — e.g. Gaussian Blur's dial is now 'Amount').");
+          }
+          return __result({ applied: applied, verified: true, effect: effectName, target: target, landed: landed, failedClips: failedClips });
         `);
         return sendCommand(script, bridgeOptions);
       },

@@ -275,25 +275,33 @@ export function getTrackTargetingTools(bridgeOptions: BridgeOptions) {
               : `var ticks = seq.getPlayerPosition().ticks;`
           }
 
-          var razored = 0;
+          // QE razor no-ops silently on some builds (verified live on 26.5) — a
+          // razor only counts if the track's clip count actually increased.
+          var changedTracks = [];
           if ("${trackType}" !== "audio") {
             for (var t = 0; t < seq.videoTracks.numTracks; t++) {
-              try {
-                qeSeq.getVideoTrackAt(t).razor(ticks);
-                razored++;
-              } catch(e) {}
+              var vCountBefore = seq.videoTracks[t].clips.numItems;
+              try { qeSeq.getVideoTrackAt(t).razor(ticks); } catch(e) {}
+              if (seq.videoTracks[t].clips.numItems > vCountBefore) {
+                changedTracks.push({ trackType: "video", trackIndex: t });
+              }
             }
           }
           if ("${trackType}" !== "video") {
             for (var t = 0; t < seq.audioTracks.numTracks; t++) {
-              try {
-                qeSeq.getAudioTrackAt(t).razor(ticks);
-                razored++;
-              } catch(e) {}
+              var aCountBefore = seq.audioTracks[t].clips.numItems;
+              try { qeSeq.getAudioTrackAt(t).razor(ticks); } catch(e) {}
+              if (seq.audioTracks[t].clips.numItems > aCountBefore) {
+                changedTracks.push({ trackType: "audio", trackIndex: t });
+              }
             }
           }
 
-          return __result({ razored: razored, atSeconds: __ticksToSeconds(ticks) });
+          if (changedTracks.length === 0) {
+            return __error("Razor produced no new clips on any track — the QE razor is a no-op on this Premiere build (verified live 2026-08-01). Construct splits by landing sub-ranges through the Source Monitor instead (open_in_source -> set_source_in_out -> overwrite_from_source).");
+          }
+
+          return __result({ razored: changedTracks.length, verified: true, changedTracks: changedTracks, atSeconds: __ticksToSeconds(ticks) });
         `);
         return sendCommand(script, bridgeOptions);
       },
