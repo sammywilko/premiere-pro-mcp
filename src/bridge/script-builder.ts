@@ -458,7 +458,11 @@ function __jsonStringify(obj) {
   // creates infinite mutual recursion ("InternalError: Stack overrun") that took
   // down every __result call in the shared engine.
   if (obj === null) return "null";
-  if (obj === undefined) return "undefined";
+  // Emitting the bare token "undefined" produced INVALID JSON that callers could not
+  // parse — list_clip_effects, the library's main verification instrument, was coming
+  // back as an unparseable string full of "matchName":undefined. Match real
+  // JSON.stringify semantics instead: drop undefined-valued keys, null inside arrays.
+  if (obj === undefined) return "null";
   if (typeof obj === "string") return '"' + obj.replace(/\\\\/g, "\\\\\\\\").replace(/"/g, '\\\\"').replace(/\\n/g, "\\\\n") + '"';
   if (typeof obj === "number" || typeof obj === "boolean") return String(obj);
   if (obj instanceof Array) {
@@ -471,7 +475,7 @@ function __jsonStringify(obj) {
   if (typeof obj === "object") {
     var parts = [];
     for (var k in obj) {
-      if (obj.hasOwnProperty(k)) {
+      if (obj.hasOwnProperty(k) && obj[k] !== undefined) {
         parts.push(__jsonStringify(k) + ":" + __jsonStringify(obj[k]));
       }
     }
@@ -522,6 +526,86 @@ function __result(data) {
 
 function __error(msg) {
   return __jsonStringify({ success: false, error: String(msg) });
+}
+
+// === QE speed helper ===
+// Premiere 26.5 has no DOM setSpeed (TrackItem.setSpeed -> ReferenceError), and QE's
+// setSpeed rejects a single argument ("Not Enough Parameters"). Adobe documents neither
+// the arity nor whether the rate is a ratio or a percent, so try the plausible forms in
+// order and stop at the first that actually moves the timeline.
+//
+// DURATION is the honest witness: a clip at ratio r has duration d0/r. getSpeed() is
+// deliberately NOT trusted to decide success — it may not exist at all, and the previous
+// get_clip_speed swallowed that in a try/catch and reported its initialised default of 1.
+// For a pure reverse (ratio 1) duration cannot move, so isSpeedReversed() is the witness.
+function __qeSetSpeed(found, ratio, reverse) {
+  app.enableQE();
+  var qeSeq = qe.project.getActiveSequence();
+  if (!qeSeq) return { ok: false, error: "No active sequence (QE)" };
+
+  var qeTrack = found.trackType === "video"
+    ? qeSeq.getVideoTrackAt(found.trackIndex)
+    : qeSeq.getAudioTrackAt(found.trackIndex);
+  if (!qeTrack) return { ok: false, error: "QE track not found at index " + found.trackIndex };
+  var qeClip = qeTrack.getItemAt(found.clipIndex);
+  if (!qeClip) return { ok: false, error: "QE clip not found at index " + found.clipIndex };
+
+  var before = __clipGeometry(found.clip);
+  var beforeReversed = null;
+  try { beforeReversed = found.clip.isSpeedReversed() == 1; } catch (e) {}
+
+  var fps = 25;
+  try { fps = app.project.activeSequence.getSettings().videoFrameRate; } catch (e) {}
+  if (!fps || fps < 1) fps = 25;
+  var targetTC = __ticksToTimecode(__secondsToTicks(before.duration / ratio), fps);
+  var pureReverse = Math.abs(ratio - 1) < 0.0001;
+
+  var attempts = [
+    { label: "ratio+tc+pitch+ripple", run: function () { qeClip.setSpeed(ratio, targetTC, reverse, true, false); } },
+    { label: "ratio+tc+reverse",      run: function () { qeClip.setSpeed(ratio, targetTC, reverse); } },
+    { label: "percent+tc+pitch+ripple", run: function () { qeClip.setSpeed(ratio * 100, targetTC, reverse, true, false); } },
+    { label: "ratio+tc",              run: function () { qeClip.setSpeed(ratio, targetTC); } }
+  ];
+
+  var tried = [];
+  for (var i = 0; i < attempts.length; i++) {
+    var err = null;
+    try { attempts[i].run(); } catch (e) { err = String(e); }
+
+    var after = __clipGeometry(found.clip);
+    var nowReversed = null;
+    try { nowReversed = found.clip.isSpeedReversed() == 1; } catch (e) {}
+
+    var moved = pureReverse
+      ? (nowReversed !== null && nowReversed !== beforeReversed)
+      : Math.abs(after.duration - before.duration) > 0.0005;
+
+    tried.push(attempts[i].label + (err ? " -> " + err : (moved ? " -> MOVED" : " -> no-op")));
+
+    if (moved) {
+      var observedRatio = pureReverse ? 1 : (before.duration / after.duration);
+      var tol = Math.max(0.02, ratio * 0.02);
+      return {
+        ok: true,
+        signature: attempts[i].label,
+        tried: tried,
+        before: before,
+        after: after,
+        requestedRatio: ratio,
+        observedRatio: observedRatio,
+        // A false here means the write LANDED but at the wrong rate — surface it loudly,
+        // because there is no undo through this bridge (TRAP 6).
+        ratioMatches: pureReverse ? true : Math.abs(observedRatio - ratio) <= tol,
+        reversed: nowReversed
+      };
+    }
+  }
+
+  return {
+    ok: false,
+    error: "QE setSpeed changed nothing under any known signature. Tried: " + tried.join(" | "),
+    tried: tried
+  };
 }
 
 // === End MCP Bridge Helpers ===

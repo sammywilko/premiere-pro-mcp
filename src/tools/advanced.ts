@@ -281,20 +281,34 @@ export function getAdvancedTools(bridgeOptions: BridgeOptions) {
           var result = __findClip("${escapeForExtendScript(args.node_id)}");
           if (!result) return __error("Clip not found");
           
-          var qeTrack = result.trackType === "video"
-            ? qeSeq.getVideoTrackAt(result.trackIndex)
-            : qeSeq.getAudioTrackAt(result.trackIndex);
-          var qeClip = qeTrack.getItemAt(result.clipIndex);
-          if (!qeClip) return __error("QE clip not found");
-          
-          qeClip.setSpeed(${args.speed_percent});
-          ${args.reverse ? `qeClip.setReverse(true);` : ""}
-          
+          // Was: qeClip.setSpeed(percent) with a single argument, which 26.5 rejects with
+          // "Not Enough Parameters". __qeSetSpeed finds the working signature and proves the
+          // result against the clip's duration rather than a self-report.
+          var outcome = __qeSetSpeed(result, ${args.speed_percent} / 100, ${!!args.reverse});
+          if (!outcome.ok) return __error(outcome.error);
+
+          if (!outcome.ratioMatches) {
+            return __error(
+              "speed LANDED BUT AT THE WRONG RATE — requested " + ${args.speed_percent} +
+              "% (ratio " + outcome.requestedRatio + ") but the clip's duration implies ratio " +
+              outcome.observedRatio + " (" + outcome.before.duration + "s -> " +
+              outcome.after.duration + "s). There is no undo through this bridge; fix the clip " +
+              "in Effect Controls. Signature used: " + outcome.signature
+            );
+          }
+
           return __result({
             speedSet: true,
+            verified: true,
             clipName: result.clip.name,
-            speed: ${args.speed_percent},
-            reverse: ${!!args.reverse}
+            requestedPercent: ${args.speed_percent},
+            observedRatio: outcome.observedRatio,
+            observedReversed: outcome.reversed,
+            reverse: ${!!args.reverse},
+            qeSignature: outcome.signature,
+            attempts: outcome.tried,
+            before: outcome.before,
+            after: outcome.after
           });
         `);
         return sendCommand(script, bridgeOptions);
@@ -483,15 +497,29 @@ export function getAdvancedTools(bridgeOptions: BridgeOptions) {
           if (!result) return __error("Clip not found: ${escapeForExtendScript(args.node_id)}");
           
           var clip = result.clip;
-          var speed = 1;
-          var reversed = false;
-          try { speed = clip.getSpeed(); } catch(e) {}
-          try { reversed = clip.isSpeedReversed() == 1; } catch(e) {}
-          
+          // These used to be initialised to 1/false with the failure swallowed, so a missing
+          // DOM method reported a confident "speed: 1" that was really just the default.
+          // Say which readings are real; a duration-derived ratio is the honest fallback.
+          var speed = null, reversed = null;
+          var speedReadOk = false, reversedReadOk = false;
+          try { speed = clip.getSpeed(); speedReadOk = true; } catch(e) {}
+          try { reversed = clip.isSpeedReversed() == 1; reversedReadOk = true; } catch(e) {}
+
+          var geo = __clipGeometry(clip);
+          var sourceSpan = geo.outPoint - geo.inPoint;
+          var impliedRatio = (geo.duration > 0.0005 && sourceSpan > 0.0005)
+            ? (sourceSpan / geo.duration) : null;
+
           return __result({
             clipName: clip.name,
-            speed: speed,
-            reversed: reversed
+            speed: speedReadOk ? speed : null,
+            reversed: reversedReadOk ? reversed : null,
+            speedReadSupported: speedReadOk,
+            reversedReadSupported: reversedReadOk,
+            impliedRatioFromDuration: impliedRatio,
+            note: speedReadOk
+              ? undefined
+              : "clip.getSpeed() is unavailable on this Premiere build — 'speed' is null rather than a fabricated 1. Use impliedRatioFromDuration, or diff duration across the change."
           });
         `);
         return sendCommand(script, bridgeOptions);

@@ -537,39 +537,33 @@ export function getTimelineTools(bridgeOptions: BridgeOptions) {
           var result = __findClip("${escapeForExtendScript(args.node_id)}");
           if (!result) return __error("Clip not found");
 
-          var clip = result.clip;
-          var before = __clipGeometry(clip);
-          var beforeSpeed = null;
-          try { beforeSpeed = clip.getSpeed(); } catch(e) {}
+          // 26.5 has no DOM TrackItem.setSpeed — this used to call it and die with a
+          // ReferenceError while app.enableQE()/qeSeq above went unused. Route through QE.
+          var outcome = __qeSetSpeed(result, ${args.speed_percent} / 100, ${!!args.reverse});
+          if (!outcome.ok) return __error(outcome.error);
 
-          var speed = "${args.speed_percent}";
-          ${args.reverse ? 'speed = "-" + speed;' : ""}
-          clip.setSpeed(speed);
-
-          var after = __clipGeometry(clip);
-          var afterSpeed = null;
-          try { afterSpeed = clip.getSpeed(); } catch(e) {}
-          var reversedNow = null;
-          try { reversedNow = clip.isSpeedReversed() == 1; } catch(e) {}
-
-          var speedMoved = beforeSpeed !== null && afterSpeed !== null && Math.abs(afterSpeed - beforeSpeed) > 0.0001;
-          var durationMoved = Math.abs(after.duration - before.duration) > 0.0005;
-          var alreadyThere = beforeSpeed !== null && (Math.abs(beforeSpeed - ${args.speed_percent}) < 0.01 || Math.abs(beforeSpeed - ${args.speed_percent} / 100) < 0.0001);
-
-          if (!speedMoved && !durationMoved && !alreadyThere) {
-            return __error("setSpeed ran but neither the clip's speed (getSpeed: " + beforeSpeed + " -> " + afterSpeed + ") nor its duration changed — nothing was applied.");
+          if (!outcome.ratioMatches) {
+            return __error(
+              "speed LANDED BUT AT THE WRONG RATE — requested " + ${args.speed_percent} +
+              "% (ratio " + outcome.requestedRatio + ") but the clip's duration implies ratio " +
+              outcome.observedRatio + " (" + outcome.before.duration + "s -> " +
+              outcome.after.duration + "s). There is no undo through this bridge; fix the clip " +
+              "in Effect Controls. Signature used: " + outcome.signature
+            );
           }
 
           return __result({
             speedChanged: true,
             verified: true,
-            clipName: clip.name,
+            clipName: result.clip.name,
             requestedPercent: ${args.speed_percent},
             reverse: ${!!args.reverse},
-            observedSpeed: afterSpeed,
-            observedReversed: reversedNow,
-            before: before,
-            after: after
+            observedRatio: outcome.observedRatio,
+            observedReversed: outcome.reversed,
+            qeSignature: outcome.signature,
+            attempts: outcome.tried,
+            before: outcome.before,
+            after: outcome.after
           });
         `);
         return sendCommand(script, bridgeOptions);
