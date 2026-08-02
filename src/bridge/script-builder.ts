@@ -464,7 +464,12 @@ function __jsonStringify(obj) {
   // JSON.stringify semantics instead: drop undefined-valued keys, null inside arrays.
   if (obj === undefined) return "null";
   if (typeof obj === "string") return '"' + obj.replace(/\\\\/g, "\\\\\\\\").replace(/"/g, '\\\\"').replace(/\\n/g, "\\\\n") + '"';
-  if (typeof obj === "number" || typeof obj === "boolean") return String(obj);
+  // Same defect as the undefined case above, and observed live 2026-08-02: list_sequences
+  // returns "inPoint":NaN for every sequence, which is not valid JSON, so the whole payload
+  // fails to parse. String(NaN) is "NaN" and String(1/0) is "Infinity" — neither is a JSON
+  // token. Real JSON.stringify emits null for any non-finite number; match it.
+  if (typeof obj === "number") return isFinite(obj) ? String(obj) : "null";
+  if (typeof obj === "boolean") return String(obj);
   if (obj instanceof Array) {
     var arr = [];
     for (var i = 0; i < obj.length; i++) {

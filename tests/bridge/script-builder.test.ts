@@ -163,4 +163,24 @@ describe("helpers execute correctly in an ES3-like engine", () => {
     expect(json.__mcpPolyfill).toBe(true);
     expect(json.stringify({ ok: 1 })).toBe('{"ok":1}');
   });
+
+  it("non-finite numbers serialise as null, so the payload still parses", () => {
+    // Observed live 2026-08-02: list_sequences returned "inPoint":NaN for every sequence,
+    // which is not a JSON token, so the entire response failed to parse — the same defect
+    // class as the bare `undefined` token fixed earlier. Premiere hands back NaN readily
+    // (an unset in-point), so this is a normal response, not a corner case.
+    const out = runInNewContext(
+      getHelpersSource() +
+        '\n__result({ inPoint: 0/0, big: 1/0, small: -1/0, real: 1.5, arr: [0/0, 2] });',
+      { JSON: undefined } as Record<string, unknown>
+    ) as string;
+
+    expect(out).not.toContain("NaN");
+    expect(out).not.toContain("Infinity");
+    expect(() => JSON.parse(out)).not.toThrow();
+    expect(JSON.parse(out)).toEqual({
+      success: true,
+      data: { inPoint: null, big: null, small: null, real: 1.5, arr: [null, 2] },
+    });
+  });
 });
