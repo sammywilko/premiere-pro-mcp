@@ -118,9 +118,22 @@ export function getAdvancedTools(bridgeOptions: BridgeOptions) {
           var beforeTrack = snapTrack();
           var seqBefore = __ticksToSeconds(app.project.activeSequence.end);
 
+          // Live probe 2026-08-02: qeClip.roll.length reports 0 (host-native, not introspectable).
+          // 2 args -> "Not Enough Parameters"; 3 args -> accepted but no-op. The 3-arg no-op is
+          // most likely a UNIT problem: 0.5s in ticks is ~1.27e11, which as a FRAME COUNT is
+          // absurd and clamps to nothing. So try frames as well as ticks, at arity 3/4/5.
+          var rollFps = 25;
+          try { rollFps = app.project.activeSequence.getSettings().videoFrameRate; } catch (e) {}
+          if (!rollFps || rollFps < 1) rollFps = 25;
+          var offsetFrames = Math.round(${args.offset_seconds} * rollFps);
+
           var rollAttempts = [
-            { label: "ticks+trackIndex", run: function () { qeClip.roll(offsetTicks, result.trackIndex); } },
-            { label: "ticks+bool",       run: function () { qeClip.roll(offsetTicks, true); } },
+            { label: "frames+0+0",       run: function () { qeClip.roll(offsetFrames, 0, 0); } },
+            { label: "frames+track+0",   run: function () { qeClip.roll(offsetFrames, result.trackIndex, 0); } },
+            { label: "frames+0+0+0",     run: function () { qeClip.roll(offsetFrames, 0, 0, 0); } },
+            { label: "frames+0+0+0+0",   run: function () { qeClip.roll(offsetFrames, 0, 0, 0, 0); } },
+            { label: "ticks+0+0+0",      run: function () { qeClip.roll(offsetTicks, 0, 0, 0); } },
+            { label: "ticks+0+0+0+0",    run: function () { qeClip.roll(offsetTicks, 0, 0, 0, 0); } },
             { label: "ticks+0+0",        run: function () { qeClip.roll(offsetTicks, 0, 0); } }
           ];
 
