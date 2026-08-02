@@ -509,6 +509,80 @@ function __clipGeometry(clip) {
   };
 }
 
+// Resolve the QE item that corresponds to a DOM clip found by __findClip.
+//
+// __findClip returns clipIndex as an index into the DOM's track.clips collection, which
+// EXCLUDES gaps. Every QE call site in this codebase then hands that straight to
+// qeTrack.getItemAt(), which indexes QE's own item list. Nothing has ever verified those
+// two orderings agree, and the widespread QE idiom of skipping items whose type is "Empty"
+// suggests QE counts blanks. If it does, one gap earlier on the track slides the index and
+// the mutation lands on a NEIGHBOURING clip — while the DOM-side verification, which reads
+// the clip we meant, sees no change and reports an innocent no-op. Silent damage to a
+// bystander clip, reported as "nothing happened", is the worst failure this bridge can
+// produce on a host with no programmatic undo.
+//
+// Rather than assume either behaviour, decide from counts alone — deliberately reading NO
+// QE clip properties, since enumerating a QE clip is what wedges the bridge (get_qe_clip_info).
+//   - No blank precedes the target: the two indexings must agree on it whichever way QE
+//     behaves, so this is a pass-through and the overwhelmingly common case is unchanged.
+//   - A blank does precede it: qeTrack.numItems tells us which convention is in force —
+//     equal to the DOM count means QE ignores blanks, equal to DOM+gaps means it counts them.
+//   - Neither matches: refuse, and report both numbers. Failing closed beats guessing, and
+//     the error carries the measurement that settles the question.
+function __qeItemForDomClip(qeTrack, found) {
+  if (!qeTrack) return { ok: false, error: "QE track not found at index " + found.trackIndex };
+
+  var seq = app.project.activeSequence;
+  var domTrack = found.trackType === "video"
+    ? seq.videoTracks[found.trackIndex]
+    : seq.audioTracks[found.trackIndex];
+  if (!domTrack) return { ok: false, error: "DOM track not found at index " + found.trackIndex };
+
+  var n = domTrack.clips.numItems;
+  var gapsBefore = 0, gapsTotal = 0, prevEnd = 0;
+  for (var i = 0; i < n; i++) {
+    var s = __ticksToSeconds(domTrack.clips[i].start.ticks);
+    if (s - prevEnd > 0.0005) {
+      gapsTotal++;
+      if (i <= found.clipIndex) gapsBefore++;
+    }
+    prevEnd = __ticksToSeconds(domTrack.clips[i].end.ticks);
+  }
+
+  var item;
+  if (gapsBefore === 0) {
+    item = qeTrack.getItemAt(found.clipIndex);
+    if (!item) return { ok: false, error: "QE clip not found at index " + found.clipIndex };
+    return { ok: true, item: item, qeIndex: found.clipIndex, gapsBefore: 0, domCount: n };
+  }
+
+  var qeCount = null;
+  try { qeCount = qeTrack.numItems; } catch (e) {}
+
+  var qeIndex = null;
+  if (qeCount === n) qeIndex = found.clipIndex;
+  else if (qeCount === n + gapsTotal) qeIndex = found.clipIndex + gapsBefore;
+
+  if (qeIndex === null) {
+    return {
+      ok: false,
+      error: "Refusing to act: " + found.trackType + " track " + found.trackIndex + " has "
+        + gapsTotal + " gap(s), " + gapsBefore + " of them before the target clip, and QE reports "
+        + qeCount + " items — matching neither the DOM clip count (" + n + ") nor DOM+gaps ("
+        + (n + gapsTotal) + "). clipIndex is a DOM index, so handing it to QE could target a "
+        + "DIFFERENT clip, and there is no undo through this bridge. Close the gaps before this "
+        + "clip, or work on a gapless track."
+    };
+  }
+
+  item = qeTrack.getItemAt(qeIndex);
+  if (!item) {
+    return { ok: false, error: "QE clip not found at index " + qeIndex + " (DOM index "
+      + found.clipIndex + " plus " + gapsBefore + " preceding gap(s))" };
+  }
+  return { ok: true, item: item, qeIndex: qeIndex, gapsBefore: gapsBefore, domCount: n, qeCount: qeCount };
+}
+
 function __newClipsOnTrack(track, beforeIds) {
   var seen = {};
   for (var i = 0; i < beforeIds.length; i++) seen[beforeIds[i]] = 1;
@@ -547,8 +621,9 @@ function __qeSetSpeed(found, ratio, reverse) {
     ? qeSeq.getVideoTrackAt(found.trackIndex)
     : qeSeq.getAudioTrackAt(found.trackIndex);
   if (!qeTrack) return { ok: false, error: "QE track not found at index " + found.trackIndex };
-  var qeClip = qeTrack.getItemAt(found.clipIndex);
-  if (!qeClip) return { ok: false, error: "QE clip not found at index " + found.clipIndex };
+  var qeLookup = __qeItemForDomClip(qeTrack, found);
+  if (!qeLookup.ok) return { ok: false, error: qeLookup.error };
+  var qeClip = qeLookup.item;
 
   if (!isFinite(ratio) || ratio <= 0) {
     return { ok: false, error: "Speed ratio must be a finite positive number (got " + ratio + "). A ratio of 0 would make the target duration Infinity." };

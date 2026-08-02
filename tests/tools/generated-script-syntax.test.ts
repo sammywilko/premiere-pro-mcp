@@ -9,8 +9,12 @@ vi.mock("../../src/bridge/file-bridge.js", () => ({
 }));
 
 import { sendCommand } from "../../src/bridge/file-bridge.js";
+import { getHelpersSource } from "../../src/bridge/script-builder.js";
 import { getTimelineTools } from "../../src/tools/timeline.js";
 import { getAdvancedTools } from "../../src/tools/advanced.js";
+import { getEffectsTools } from "../../src/tools/effects.js";
+import { getClipboardTools } from "../../src/tools/clipboard.js";
+import { getTrackTargetingTools } from "../../src/tools/track-targeting.js";
 
 const mockedSendCommand = vi.mocked(sendCommand);
 const bridgeOptions: BridgeOptions = { tempDir: "/tmp/test-bridge", timeoutMs: 5000 };
@@ -68,6 +72,10 @@ describe("generated ExtendScript parses for every optional-argument shape", () =
     });
   }
 
+  it("the prepended helper source parses", () => {
+    expectParses(`(function(){ ${getHelpersSource()} })()`, "getHelpersSource()");
+  });
+
   it("a node_id containing quotes cannot break out of its string literal", async () => {
     const script = await scriptFor(timeline.move_clip, {
       node_id: 'x"); app.project.close(); ("',
@@ -79,5 +87,64 @@ describe("generated ExtendScript parses for every optional-argument shape", () =
     expectParses(script, "move_clip / hostile node_id");
     expect(script).toContain('x\\"); app.project.close(); (\\"');
     expect(script).not.toMatch(/[^\\]"\); app\.project\.close/);
+  });
+});
+
+/**
+ * __findClip returns clipIndex as an index into the DOM's track.clips collection, which
+ * excludes gaps. QE's getItemAt indexes QE's own item list. Handing one to the other is
+ * only safe when no blank precedes the target, so every call site has to go through
+ * __qeItemForDomClip, which checks that and refuses when it cannot tell. A mutation landing
+ * on a neighbouring clip is unrecoverable here — there is no undo through this bridge — and
+ * the DOM-side verification would read the clip we *meant* and report an innocent no-op.
+ *
+ * This sweeps every tool in the QE-using modules rather than a hand-picked few, so a new
+ * tool that reintroduces the raw pattern fails here instead of in someone's timeline.
+ */
+describe("no tool hands a DOM clip index straight to QE", () => {
+  const modules = {
+    effects: getEffectsTools(bridgeOptions),
+    advanced: getAdvancedTools(bridgeOptions),
+    clipboard: getClipboardTools(bridgeOptions),
+    "track-targeting": getTrackTargetingTools(bridgeOptions),
+    timeline: getTimelineTools(bridgeOptions),
+  } as Record<string, Record<string, { handler: (args: never) => Promise<unknown> }>>;
+
+  // Permissive bag: these handlers assemble strings rather than validate, so one bag covers
+  // essentially all of them. Anything that does throw is skipped, not silently passed.
+  const argBag = {
+    node_id: "node1", source_node_id: "node1", target_node_id: "node2",
+    item_id: "item1", clip_index: 0, track_index: 0, track_type: "video",
+    effect_name: "Gaussian Blur", pattern: "Scene_{n}", target: "selected",
+    new_start_seconds: 1, new_in_seconds: 1, new_out_seconds: 2,
+    offset_seconds: 0.5, speed_percent: 50, start_seconds: 0, position_seconds: 1,
+  };
+
+  it("every generated script uses __qeItemForDomClip, never getItemAt(result.clipIndex)", async () => {
+    const offenders: string[] = [];
+    let checked = 0;
+
+    for (const [moduleName, tools] of Object.entries(modules)) {
+      for (const [toolName, tool] of Object.entries(tools)) {
+        // get_qe_clip_info takes a raw caller-chosen QE index by contract, and is documented
+        // as never-call (it wedges the CEP bridge). It is not a DOM-index consumer.
+        if (toolName === "get_qe_clip_info") continue;
+        if (typeof tool?.handler !== "function") continue;
+
+        let script: string;
+        try {
+          script = await scriptFor(tool, argBag);
+        } catch {
+          continue; // handler needs a shape this bag doesn't supply
+        }
+        checked++;
+        if (/\.getItemAt\((?:result|tgtResult)\.clipIndex\)/.test(script)) {
+          offenders.push(`${moduleName}.${toolName}`);
+        }
+      }
+    }
+
+    expect(checked).toBeGreaterThan(20);
+    expect(offenders, "these tools feed a DOM clipIndex to QE directly").toEqual([]);
   });
 });

@@ -36,8 +36,9 @@ export function getEffectsTools(bridgeOptions: BridgeOptions) {
           
           if (!qeTrack) return __error("QE track not found");
           
-          var qeClip = qeTrack.getItemAt(result.clipIndex);
-          if (!qeClip) return __error("QE clip not found");
+          var qeLookup = __qeItemForDomClip(qeTrack, result);
+          if (!qeLookup.ok) return __error(qeLookup.error);
+          var qeClip = qeLookup.item;
           
           // Search for the effect
           var effects = qe.project.getVideoEffectList();
@@ -86,8 +87,9 @@ export function getEffectsTools(bridgeOptions: BridgeOptions) {
           var qeTrack = qeSeq.getAudioTrackAt(result.trackIndex);
           if (!qeTrack) return __error("QE audio track not found");
           
-          var qeClip = qeTrack.getItemAt(result.clipIndex);
-          if (!qeClip) return __error("QE clip not found");
+          var qeLookup = __qeItemForDomClip(qeTrack, result);
+          if (!qeLookup.ok) return __error(qeLookup.error);
+          var qeClip = qeLookup.item;
           
           var effects = qe.project.getAudioEffectList();
           var found = false;
@@ -275,7 +277,9 @@ export function getEffectsTools(bridgeOptions: BridgeOptions) {
           
           if (!hasLumetri) {
             var qeTrack = qeSeq.getVideoTrackAt(result.trackIndex);
-            var qeClip = qeTrack.getItemAt(result.clipIndex);
+            var qeLookup = __qeItemForDomClip(qeTrack, result);
+            if (!qeLookup.ok) return __error(qeLookup.error);
+            var qeClip = qeLookup.item;
             var effects = qe.project.getVideoEffectList();
             for (var i = 0; i < effects.numItems; i++) {
               if (effects[i].name === "Lumetri Color") {
@@ -348,7 +352,9 @@ export function getEffectsTools(bridgeOptions: BridgeOptions) {
           if (!lumetriComp) {
             var qeSeq = qe.project.getActiveSequence();
             var qeTrack = qeSeq.getVideoTrackAt(result.trackIndex);
-            var qeClip = qeTrack.getItemAt(result.clipIndex);
+            var qeLookup = __qeItemForDomClip(qeTrack, result);
+            if (!qeLookup.ok) return __error(qeLookup.error);
+            var qeClip = qeLookup.item;
             var effects = qe.project.getVideoEffectList();
             for (var i = 0; i < effects.numItems; i++) {
               if (effects[i].name === "Lumetri Color") {
@@ -417,8 +423,9 @@ export function getEffectsTools(bridgeOptions: BridgeOptions) {
             : null;
           if (!qeTrack) return __error("Warp Stabilizer can only be applied to video clips");
           
-          var qeClip = qeTrack.getItemAt(result.clipIndex);
-          if (!qeClip) return __error("QE clip not found");
+          var qeLookup = __qeItemForDomClip(qeTrack, result);
+          if (!qeLookup.ok) return __error(qeLookup.error);
+          var qeClip = qeLookup.item;
           
           // Find and apply Warp Stabilizer
           var effects = qe.project.getVideoEffectList();

@@ -848,6 +848,8 @@ export function getTrackTargetingTools(bridgeOptions: BridgeOptions) {
 
           var track = tracks[${args.track_index}];
           var renamed = 0;
+          var attempted = 0;
+          var failures = [];
           var num = ${startNum};
           var pattern = "${escapeForExtendScript(args.pattern)}";
 
@@ -855,16 +857,47 @@ export function getTrackTargetingTools(bridgeOptions: BridgeOptions) {
             var clip = track.clips[c];
             ${args.selected_only ? `if (!clip.isSelected()) continue;` : ""}
 
+            attempted++;
             var newName = pattern.split("{n}").join("" + num).split("{name}").join(clip.name);
+            var nameBefore = clip.name;
+
+            // This loop walks the DOM clip list but used to apply through qeTrack.getItemAt(c),
+            // a QE index. On a track with gaps those orderings can diverge and the rename would
+            // land on a different clip entirely.
+            var lookup = __qeItemForDomClip(qeTrack, { trackType: "${args.track_type}", trackIndex: ${args.track_index}, clipIndex: c });
+            if (!lookup.ok) {
+              failures.push({ clipIndex: c, name: nameBefore, error: lookup.error });
+              num++;
+              continue;
+            }
+
             try {
-              var qeClip = qeTrack.getItemAt(c);
-              qeClip.setName(newName);
+              lookup.item.setName(newName);
+            } catch (e) {
+              failures.push({ clipIndex: c, name: nameBefore, error: String(e) });
+              num++;
+              continue;
+            }
+
+            // renamed++ used to fire on any call that didn't throw, so a QE setName that
+            // silently did nothing still counted. Confirm against the DOM instead.
+            if (track.clips[c].name === newName) {
               renamed++;
-            } catch(e) {}
+            } else {
+              failures.push({ clipIndex: c, name: nameBefore, error: "setName did not change the clip name (still '" + track.clips[c].name + "')" });
+            }
             num++;
           }
 
-          return __result({ renamed: renamed, pattern: pattern });
+          if (attempted === 0) {
+            return __error("No clips matched on ${args.track_type} track ${args.track_index} — nothing to rename.");
+          }
+          if (renamed === 0) {
+            return __error("Renamed none of the " + attempted + " targeted clip(s); the DOM name never changed. First failure: "
+              + (failures.length ? failures[0].error : "unknown"));
+          }
+
+          return __result({ renamed: renamed, verified: true, attempted: attempted, failures: failures, pattern: pattern });
         `);
         return sendCommand(script, bridgeOptions);
       },

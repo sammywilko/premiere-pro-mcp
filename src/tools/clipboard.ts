@@ -43,7 +43,9 @@ export function getClipboardTools(bridgeOptions: BridgeOptions) {
           var tgtTrack = tgtTrackType === "video" 
             ? qeSeq.getVideoTrackAt(tgtResult.trackIndex) 
             : qeSeq.getAudioTrackAt(tgtResult.trackIndex);
-          var qeTgtClip = tgtTrack.getItemAt(tgtResult.clipIndex);
+          var tgtLookup = __qeItemForDomClip(tgtTrack, tgtResult);
+          if (!tgtLookup.ok) return __error(tgtLookup.error);
+          var qeTgtClip = tgtLookup.item;
 
           for (var i = 0; i < src.components.numItems; i++) {
             var comp = src.components[i];
@@ -247,7 +249,15 @@ export function getClipboardTools(bridgeOptions: BridgeOptions) {
               var countBefore = domClip.components ? domClip.components.numItems : -1;
 
               var qeTrack = trackType === "video" ? qeSeq.getVideoTrackAt(trackIdx) : qeSeq.getAudioTrackAt(trackIdx);
-              var qeClip = qeTrack.getItemAt(clipIdx);
+              // clipIdx is a DOM index; __qeItemForDomClip refuses rather than let a gap
+              // slide it onto a neighbouring clip. Effects are a one-way door here — there is
+              // no removal path — so a wrong target cannot be walked back.
+              var qeLookup = __qeItemForDomClip(qeTrack, { trackType: trackType, trackIndex: trackIdx, clipIndex: clipIdx });
+              if (!qeLookup.ok) {
+                failedClips.push({ trackType: trackType, trackIndex: trackIdx, clipIndex: clipIdx, nodeId: domClip.nodeId, error: qeLookup.error });
+                return;
+              }
+              var qeClip = qeLookup.item;
               if (isAudio || trackType === "audio") {
                 qeClip.addAudioEffect(qeEffect);
               } else {
