@@ -539,18 +539,10 @@ export function getTimelineTools(bridgeOptions: BridgeOptions) {
 
           // 26.5 has no DOM TrackItem.setSpeed — this used to call it and die with a
           // ReferenceError while app.enableQE()/qeSeq above went unused. Route through QE.
+          // __qeSetSpeed verifies against getSpeed(), and on a wrong-rate landing it restores
+          // the clip and returns ok:false with the full story — so ok is the only check needed.
           var outcome = __qeSetSpeed(result, ${args.speed_percent} / 100, ${!!args.reverse});
           if (!outcome.ok) return __error(outcome.error);
-
-          if (!outcome.ratioMatches) {
-            return __error(
-              "speed LANDED BUT AT THE WRONG RATE — requested " + ${args.speed_percent} +
-              "% (ratio " + outcome.requestedRatio + ") but the clip's duration implies ratio " +
-              outcome.observedRatio + " (" + outcome.before.duration + "s -> " +
-              outcome.after.duration + "s). There is no undo through this bridge; fix the clip " +
-              "in Effect Controls. Signature used: " + outcome.signature
-            );
-          }
 
           return __result({
             speedChanged: true,
@@ -558,7 +550,8 @@ export function getTimelineTools(bridgeOptions: BridgeOptions) {
             clipName: result.clip.name,
             requestedPercent: ${args.speed_percent},
             reverse: ${!!args.reverse},
-            observedRatio: outcome.observedRatio,
+            observedSpeed: outcome.observedSpeed,
+            observedRatioFromDuration: outcome.observedRatioFromDuration,
             observedReversed: outcome.reversed,
             qeSignature: outcome.signature,
             attempts: outcome.tried,

@@ -554,49 +554,77 @@ function __qeSetSpeed(found, ratio, reverse) {
   var beforeReversed = null;
   try { beforeReversed = found.clip.isSpeedReversed() == 1; } catch (e) {}
 
-  var fps = 25;
-  try { fps = app.project.activeSequence.getSettings().videoFrameRate; } catch (e) {}
-  if (!fps || fps < 1) fps = 25;
-  var targetTC = __ticksToTimecode(__secondsToTicks(before.duration / ratio), fps);
-  var pureReverse = Math.abs(ratio - 1) < 0.0001;
+  var beforeSpeed = null, speedReadable = false;
+  try { beforeSpeed = found.clip.getSpeed(); speedReadable = true; } catch (e) {}
 
+  // The duration argument is TICKS-AS-STRING, like every other time value this codebase
+  // hands Premiere. Passing a TIMECODE string parses to ~0 and clamps the clip to a single
+  // frame — observed live 2026-08-02: a 3s clip became 0.04s with outPoint 3 -> 0.04, i.e.
+  // it set duration and ignored speed entirely.
+  var targetDurTicks = __secondsToTicks(before.duration / ratio).toString();
+  var originalDurTicks = __secondsToTicks(before.duration).toString();
+
+  // Because we now SET duration explicitly, duration is no longer an independent witness —
+  // a signature with the wrong speed units could still produce the right duration. getSpeed()
+  // is confirmed readable on this build, so it is the witness; duration only corroborates.
   var attempts = [
-    { label: "ratio+tc+pitch+ripple", run: function () { qeClip.setSpeed(ratio, targetTC, reverse, true, false); } },
-    { label: "ratio+tc+reverse",      run: function () { qeClip.setSpeed(ratio, targetTC, reverse); } },
-    { label: "percent+tc+pitch+ripple", run: function () { qeClip.setSpeed(ratio * 100, targetTC, reverse, true, false); } },
-    { label: "ratio+tc",              run: function () { qeClip.setSpeed(ratio, targetTC); } }
+    { label: "ratio+durTicks+pitch+ripple",   run: function () { qeClip.setSpeed(ratio, targetDurTicks, reverse, true, false); } },
+    { label: "percent+durTicks+pitch+ripple", run: function () { qeClip.setSpeed(ratio * 100, targetDurTicks, reverse, true, false); } },
+    { label: "ratio+durTicks+reverse",        run: function () { qeClip.setSpeed(ratio, targetDurTicks, reverse); } }
   ];
 
+  var tol = Math.max(0.01, ratio * 0.02);
   var tried = [];
+
   for (var i = 0; i < attempts.length; i++) {
     var err = null;
     try { attempts[i].run(); } catch (e) { err = String(e); }
 
     var after = __clipGeometry(found.clip);
+    var nowSpeed = null;
+    try { nowSpeed = found.clip.getSpeed(); } catch (e) {}
     var nowReversed = null;
     try { nowReversed = found.clip.isSpeedReversed() == 1; } catch (e) {}
 
-    var moved = pureReverse
-      ? (nowReversed !== null && nowReversed !== beforeReversed)
-      : Math.abs(after.duration - before.duration) > 0.0005;
+    var speedMoved    = speedReadable && nowSpeed !== null && Math.abs(nowSpeed - beforeSpeed) > 0.0001;
+    var durationMoved = Math.abs(after.duration - before.duration) > 0.0005;
+    var reverseMoved  = nowReversed !== null && nowReversed !== beforeReversed;
+    var changed = speedMoved || durationMoved || reverseMoved;
 
-    tried.push(attempts[i].label + (err ? " -> " + err : (moved ? " -> MOVED" : " -> no-op")));
+    var correct = speedReadable && nowSpeed !== null
+      ? Math.abs(nowSpeed - ratio) <= tol
+      : Math.abs((before.duration / Math.max(after.duration, 0.0001)) - ratio) <= tol;
 
-    if (moved) {
-      var observedRatio = pureReverse ? 1 : (before.duration / after.duration);
-      var tol = Math.max(0.02, ratio * 0.02);
+    tried.push(attempts[i].label + (err ? " -> " + err : (changed ? (correct ? " -> CORRECT" : " -> WRONG") : " -> no-op")));
+
+    if (changed && correct) {
       return {
-        ok: true,
-        signature: attempts[i].label,
-        tried: tried,
-        before: before,
-        after: after,
-        requestedRatio: ratio,
-        observedRatio: observedRatio,
-        // A false here means the write LANDED but at the wrong rate — surface it loudly,
-        // because there is no undo through this bridge (TRAP 6).
-        ratioMatches: pureReverse ? true : Math.abs(observedRatio - ratio) <= tol,
-        reversed: nowReversed
+        ok: true, signature: attempts[i].label, tried: tried,
+        before: before, after: after,
+        requestedRatio: ratio, observedSpeed: nowSpeed,
+        observedRatioFromDuration: before.duration / Math.max(after.duration, 0.0001),
+        ratioMatches: true, reversed: nowReversed
+      };
+    }
+
+    if (changed && !correct) {
+      // It landed, at the wrong rate. There is no undo through this bridge (TRAP 6), so put
+      // the clip back ourselves rather than leaving damage behind — same posture as move_clip.
+      var restored = false;
+      try {
+        qeClip.setSpeed(1, originalDurTicks, false, true, false);
+        var back = __clipGeometry(found.clip);
+        restored = Math.abs(back.duration - before.duration) <= 0.0005;
+      } catch (e) {}
+      return {
+        ok: false,
+        error: "QE setSpeed landed at the WRONG rate via '" + attempts[i].label + "': requested ratio "
+          + ratio + ", clip reports speed " + nowSpeed + " and duration " + before.duration + "s -> "
+          + after.duration + "s. " + (restored
+              ? "The clip HAS been restored to its original duration."
+              : "RESTORE FAILED — fix this clip by hand in Effect Controls.")
+          + " Tried: " + tried.join(" | "),
+        restored: restored, tried: tried
       };
     }
   }

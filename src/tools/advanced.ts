@@ -81,9 +81,81 @@ export function getAdvancedTools(bridgeOptions: BridgeOptions) {
           var qeClip = qeTrack.getItemAt(result.clipIndex);
           if (!qeClip) return __error("QE clip not found");
           
+          // qeClip.roll(ticks) with a single argument answers "Not Enough Parameters" on 26.5
+          // (verified live 2026-08-02), and this used to return a hardcoded {rolled:true}.
+          // The ticks were already right — only the arity is wrong — so probe the declared
+          // arity rather than guessing, then try the plausible forms and PROVE the result.
           var offsetTicks = __secondsToTicks(${args.offset_seconds}).toString();
-          qeClip.roll(offsetTicks);
-          return __result({ rolled: true, clipName: result.clip.name, offsetSeconds: ${args.offset_seconds} });
+          var declaredArity = null;
+          try { declaredArity = qeClip.roll.length; } catch (e) {}
+
+          var domTrack = result.trackType === "video"
+            ? app.project.activeSequence.videoTracks[result.trackIndex]
+            : app.project.activeSequence.audioTracks[result.trackIndex];
+
+          function snapTrack() {
+            var out = [];
+            for (var c = 0; c < domTrack.clips.numItems; c++) {
+              var k = domTrack.clips[c];
+              out.push({
+                nodeId: k.nodeId,
+                start: __ticksToSeconds(k.start.ticks),
+                end: __ticksToSeconds(k.end.ticks)
+              });
+            }
+            return out;
+          }
+          function trackChanged(a, b) {
+            if (a.length !== b.length) return true;
+            for (var i = 0; i < a.length; i++) {
+              if (a[i].nodeId !== b[i].nodeId) return true;
+              if (Math.abs(a[i].start - b[i].start) > 0.0005) return true;
+              if (Math.abs(a[i].end - b[i].end) > 0.0005) return true;
+            }
+            return false;
+          }
+
+          var beforeTrack = snapTrack();
+          var seqBefore = __ticksToSeconds(app.project.activeSequence.end);
+
+          var rollAttempts = [
+            { label: "ticks+trackIndex", run: function () { qeClip.roll(offsetTicks, result.trackIndex); } },
+            { label: "ticks+bool",       run: function () { qeClip.roll(offsetTicks, true); } },
+            { label: "ticks+0+0",        run: function () { qeClip.roll(offsetTicks, 0, 0); } }
+          ];
+
+          var rollTried = [];
+          for (var r = 0; r < rollAttempts.length; r++) {
+            var rErr = null;
+            try { rollAttempts[r].run(); } catch (e) { rErr = String(e); }
+            var afterTrack = snapTrack();
+            var moved = trackChanged(beforeTrack, afterTrack);
+            rollTried.push(rollAttempts[r].label + (rErr ? " -> " + rErr : (moved ? " -> MOVED" : " -> no-op")));
+            if (moved) {
+              var seqAfter = __ticksToSeconds(app.project.activeSequence.end);
+              // A true roll moves the shared boundary and leaves total duration alone.
+              var durationHeld = Math.abs(seqAfter - seqBefore) <= 0.0005;
+              return __result({
+                rolled: true,
+                verified: true,
+                durationHeld: durationHeld,
+                warning: durationHeld ? undefined
+                  : "Sequence duration changed (" + seqBefore + "s -> " + seqAfter + "s) — a true roll holds it. This behaved more like a trim; inspect before trusting.",
+                clipName: result.clip.name,
+                offsetSeconds: ${args.offset_seconds},
+                qeSignature: rollAttempts[r].label,
+                declaredArity: declaredArity,
+                attempts: rollTried,
+                beforeTrack: beforeTrack,
+                afterTrack: afterTrack
+              });
+            }
+          }
+
+          return __error(
+            "roll_edit changed nothing under any tried signature. qeClip.roll declares arity "
+            + declaredArity + " (null = not introspectable). Tried: " + rollTried.join(" | ")
+          );
         `);
         return sendCommand(script, bridgeOptions);
       },
@@ -287,22 +359,13 @@ export function getAdvancedTools(bridgeOptions: BridgeOptions) {
           var outcome = __qeSetSpeed(result, ${args.speed_percent} / 100, ${!!args.reverse});
           if (!outcome.ok) return __error(outcome.error);
 
-          if (!outcome.ratioMatches) {
-            return __error(
-              "speed LANDED BUT AT THE WRONG RATE — requested " + ${args.speed_percent} +
-              "% (ratio " + outcome.requestedRatio + ") but the clip's duration implies ratio " +
-              outcome.observedRatio + " (" + outcome.before.duration + "s -> " +
-              outcome.after.duration + "s). There is no undo through this bridge; fix the clip " +
-              "in Effect Controls. Signature used: " + outcome.signature
-            );
-          }
-
           return __result({
             speedSet: true,
             verified: true,
             clipName: result.clip.name,
             requestedPercent: ${args.speed_percent},
-            observedRatio: outcome.observedRatio,
+            observedSpeed: outcome.observedSpeed,
+            observedRatioFromDuration: outcome.observedRatioFromDuration,
             observedReversed: outcome.reversed,
             reverse: ${!!args.reverse},
             qeSignature: outcome.signature,
