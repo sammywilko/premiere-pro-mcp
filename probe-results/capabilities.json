@@ -1,0 +1,1431 @@
+{
+  "probedAt": "2026-08-02",
+  "premiere": "26.5.0",
+  "note": "Verdicts are judged by observing Premiere before/after, never by the tool's own report. UNWITNESSED means the prober could not see the tool's domain — it is 'unknown', not 'broken'.",
+  "summary": {
+    "WORKS": 90,
+    "FABRICATES": 5,
+    "WEDGES": 1,
+    "NOOP_REPORTED_OK": 2,
+    "UNWITNESSED": 26,
+    "HONEST_ERROR": 49,
+    "THREW": 3,
+    "UNTESTABLE": 1,
+    "SKIPPED": 25
+  },
+  "totals": {
+    "registered": 202,
+    "probed": 176,
+    "unprobed": 26
+  },
+  "tools": {
+    "add_adjustment_layer": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"No supported adjustment-layer API found in this Premiere version\"}"
+    },
+    "add_audio_keyframes": {
+      "verdict": "UNTESTABLE",
+      "domain": "keyframes",
+      "tier": "T1_WRITE",
+      "why": "no fixture for required arg(s): keyframes"
+    },
+    "add_custom_metadata_field": {
+      "verdict": "UNWITNESSED",
+      "domain": "metadata",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'metadata' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"added\":true,\"name\":\"PROBE_TMP\",\"label\":\"PROBE_TMP\"}}",
+      "rescored": true
+    },
+    "add_keyframe": {
+      "verdict": "HONEST_ERROR",
+      "domain": "keyframes",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Effect not found\"}"
+    },
+    "add_marker": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"added\":true,\"timeSeconds\":1,\"name\":\"\",\"comments\":\"\"}}"
+    },
+    "add_marker_to_project_item": {
+      "verdict": "UNWITNESSED",
+      "domain": "projectitem",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'projectitem' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"added\":true,\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"timeSeconds\":1}}",
+      "rescored": true
+    },
+    "add_text_overlay": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"createCaptionTrack failed: Error: Not Enough Parameters\"}"
+    },
+    "add_to_render_queue": {
+      "verdict": "SKIPPED",
+      "domain": "filesystem",
+      "tier": "T3_SLOW",
+      "why": "slow / invokes AME"
+    },
+    "add_to_timeline": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"added\":true,\"verified\":true,\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"trackIndex\":0,\"startSeconds\":0,\"newClips\":{\"video\":[{\"nodeId\":\"000f4431\",\"name\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f9"
+    },
+    "add_track": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"ReferenceError: seq.insertVideoTrackAt is not a function\"}"
+    },
+    "add_tracks": {
+      "verdict": "FABRICATES",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "asserts a positive outcome while its OWN counters report zero, and nothing observable changed",
+      "reported": "{\"success\":true,\"data\":{\"added\":true,\"videoTracks\":0,\"audioTracks\":0,\"audioMonoTracks\":0,\"audio51Tracks\":0}}"
+    },
+    "add_transition": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"This Premiere build does not expose qeTrack.addTransition; native transition writes are unavailable (confirmed on Premiere Pro 26.3). Use an overlay clip where possible.\"}"
+    },
+    "add_transition_to_clip": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"This Premiere build does not expose qeTrack.addTransition; native transition writes are unavailable (confirmed on Premiere Pro 26.3). Use an overlay clip where possible.\"}"
+    },
+    "adjust_audio_levels": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Could not find Volume/Level property on clip\"}"
+    },
+    "apply_audio_effect": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Error: Unknown error exception\"}"
+    },
+    "apply_edit_plan": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged"
+    },
+    "apply_effect": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Effect not found: Gaussian Blur\"}"
+    },
+    "apply_lut": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Could not apply Lumetri Color effect\"}"
+    },
+    "attach_custom_property": {
+      "verdict": "UNWITNESSED",
+      "domain": "metadata",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'metadata' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"attached\":true,\"propertyId\":\"PROBE_TMP\",\"value\":\"PROBE_TMP\"}}",
+      "rescored": true
+    },
+    "auto_reframe_sequence": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "T3_SLOW",
+      "why": "slow / invokes AME"
+    },
+    "batch_add_transitions": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"This Premiere build does not expose qeTrack.addTransition; native transition writes are unavailable (confirmed on Premiere Pro 26.3). Use overlay clips where possible.\"}"
+    },
+    "batch_apply_effect": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"No clips matched the target 'selected' — nothing to apply to.\"}"
+    },
+    "batch_enable_disable": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"affected\":0,\"enabled\":true}}"
+    },
+    "batch_rename_clips": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"renamed\":4,\"verified\":true,\"attempted\":4,\"failures\":[],\"pattern\":\"PROBE_TMP\"}}"
+    },
+    "capture_frame": {
+      "verdict": "UNWITNESSED",
+      "domain": "filesystem",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'filesystem' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"captured\":true,\"mimeType\":\"image/png\",\"base64\":\"iVBORw0KGgoAAAANSUhEUgAABQAAAALQCAIAAABAH0oBAAAJRGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV",
+      "rescored": true
+    },
+    "check_offline_media": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"offlineCount\":0,\"items\":[]}}"
+    },
+    "clear_item_in_out": {
+      "verdict": "UNWITNESSED",
+      "domain": "projectitem",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'projectitem' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"clearedIn\":true,\"clearedOut\":true}}",
+      "rescored": true
+    },
+    "clear_sequence_in_out": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Error: Illegal Parameter type\"}"
+    },
+    "close_all_source_clips": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "T2_DESTRUCTIVE",
+      "why": "destroys project contents"
+    },
+    "close_project": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "DENY",
+      "why": "closes the project the probe is running in"
+    },
+    "close_sequence": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "T2_DESTRUCTIVE",
+      "why": "destroys project contents"
+    },
+    "close_source_monitor": {
+      "verdict": "FABRICATES",
+      "domain": "srcmonitor",
+      "tier": "T1_WRITE",
+      "why": "asserts a positive outcome but nothing observable changed",
+      "reported": "{\"success\":true,\"data\":{\"closed\":true}}"
+    },
+    "color_correct": {
+      "verdict": "FABRICATES",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "asserts a positive outcome but nothing observable changed",
+      "reported": "{\"success\":true,\"data\":{\"colorCorrected\":true,\"clipName\":\"PROBE_TMP\",\"changes\":{},\"errors\":{}}}"
+    },
+    "consolidate_and_transfer": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "T3_SLOW",
+      "why": "slow / invokes AME"
+    },
+    "consolidate_duplicates": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "T3_SLOW",
+      "why": "slow / invokes AME"
+    },
+    "copy_effect_values": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Effect not found on source clip: Gaussian Blur\"}"
+    },
+    "copy_effects_between_clips": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"copiedEffects\":0,\"source\":\"PROBE_TMP\",\"target\":\"PROBE_TMP\"}}"
+    },
+    "create_bars_and_tone": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Error: Illegal Parameter type\"}"
+    },
+    "create_bin": {
+      "verdict": "WORKS",
+      "domain": "bins",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"nodeId\":\"000f4432\"}}"
+    },
+    "create_caption_track": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Failed to create caption track\"}"
+    },
+    "create_project": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "DENY",
+      "why": "switches project mid-run"
+    },
+    "create_sequence": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"id\":\"f7024c69-f6aa-4213-a43d-d5992e2362b7\",\"presetUsed\":\"/Applications/Adobe Premiere Pro (Beta)/Adobe Premiere Pro (Beta).app/Contents/Settings/SequencePresets/UHD (4K)/UHD (4K) 21"
+    },
+    "create_sequence_from_clips": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"id\":\"23c3c7ff-eb07-403b-8630-0bbf533679d2\",\"clipCount\":1}}"
+    },
+    "create_sequence_from_preset": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Failed to create sequence from preset: PROBE_TMP\"}"
+    },
+    "create_smart_bin": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"query\":\"PROBE_TMP\"}}"
+    },
+    "create_subclip": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"source\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\"}}"
+    },
+    "create_subsequence": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE-SCRATCH_Sub_01\",\"id\":\"9c10a664-81a2-48d9-bc86-30c61e43600a\"}}"
+    },
+    "delete_bin": {
+      "verdict": "SKIPPED",
+      "domain": "bins",
+      "tier": "T2_DESTRUCTIVE",
+      "why": "destroys project contents"
+    },
+    "delete_marker": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"No marker found at 1s\"}"
+    },
+    "delete_multiple_project_items": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "T2_DESTRUCTIVE",
+      "why": "destroys project contents"
+    },
+    "delete_preview_files": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "T3_SLOW",
+      "why": "slow / invokes AME"
+    },
+    "delete_project_item": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "T2_DESTRUCTIVE",
+      "why": "destroys project contents"
+    },
+    "delete_sequence": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "T2_DESTRUCTIVE",
+      "why": "destroys project contents"
+    },
+    "delete_track": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"ReferenceError: seq.deleteVideoTrackAt is not a function\"}"
+    },
+    "deselect_all_clips": {
+      "verdict": "UNWITNESSED",
+      "domain": "selection",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"deselected\":4}}",
+      "rescored": true
+    },
+    "detach_proxy": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "T2_DESTRUCTIVE",
+      "why": "destroys project contents"
+    },
+    "duplicate_clip": {
+      "verdict": "FABRICATES",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "asserts a positive outcome but nothing observable changed",
+      "reported": "{\"success\":true,\"data\":{\"duplicated\":true,\"clipName\":\"PROBE_TMP\",\"newTrackIndex\":1}}"
+    },
+    "duplicate_sequence": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"duplicated\":true,\"originalName\":\"PROBE-SCRATCH\"}}"
+    },
+    "enable_disable_clip": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"ReferenceError: result.clip.setDisabled is not a function\"}"
+    },
+    "encode_file": {
+      "verdict": "SKIPPED",
+      "domain": "filesystem",
+      "tier": "T3_SLOW",
+      "why": "slow / invokes AME"
+    },
+    "encode_project_item": {
+      "verdict": "SKIPPED",
+      "domain": "filesystem",
+      "tier": "T3_SLOW",
+      "why": "slow / invokes AME"
+    },
+    "evaluate_expression": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Expression error: ReferenceError: PROBE_TMP is undefined\"}"
+    },
+    "execute_extendscript": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"ReferenceError: PROBE_TMP is undefined\"}"
+    },
+    "export_aaf": {
+      "verdict": "HONEST_ERROR",
+      "domain": "filesystem",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"ReferenceError: seq.exportAsAAF is not a function\"}"
+    },
+    "export_as_fcp_xml": {
+      "verdict": "UNWITNESSED",
+      "domain": "filesystem",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'filesystem' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"outputPath\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\",\"format\":\"FCP XML\"}}",
+      "rescored": true
+    },
+    "export_as_project": {
+      "verdict": "UNWITNESSED",
+      "domain": "filesystem",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'filesystem' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"path\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\"}}",
+      "rescored": true
+    },
+    "export_frame": {
+      "verdict": "UNWITNESSED",
+      "domain": "filesystem",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'filesystem' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"outputPath\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\",\"method\":\"ame\"}}",
+      "rescored": true
+    },
+    "export_frame_uxp": {
+      "verdict": "HONEST_ERROR",
+      "domain": "filesystem",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged"
+    },
+    "export_omf": {
+      "verdict": "UNWITNESSED",
+      "domain": "filesystem",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'filesystem' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"outputPath\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\",\"format\":\"OMF\"}}",
+      "rescored": true
+    },
+    "export_sequence": {
+      "verdict": "SKIPPED",
+      "domain": "filesystem",
+      "tier": "T3_SLOW",
+      "why": "slow / invokes AME"
+    },
+    "extract_selection": {
+      "verdict": "UNWITNESSED",
+      "domain": "selection",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"extracted\":true}}",
+      "rescored": true
+    },
+    "find_items_by_media_path": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"count\":0,\"items\":[]}}"
+    },
+    "find_project_item_by_name": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Project item not found: PROBE_TMP\"}"
+    },
+    "freeze_frame": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"path\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\",\"method\":\"ame\",\"atSeconds\":0,\"note\":\"Frame exported and imported. Add to timeline with add_to_ti"
+    },
+    "get_active_sequence": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"name\":\"PROBE-SCRATCH\",\"id\":\"080bc1b6-4cbf-44fe-977e-23fc3180c31c\",\"frameSizeHorizontal\":1280,\"frameSizeVertical\":720,\"end\":6,\"videoTracks\":[{\"index\":0,\"name\":\"Video 1\",\"numClips\":2,\"clips\":[{\"nodeId\":\"000f4423\",\"nam"
+    },
+    "get_advanced_feature_support": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"schemaVersion\":1,\"context\":{\"backend\":\"cep\",\"premiereVersion\":null,\"frameIoEntitled\":null,\"generativeAiEntitled\":null,\"networkAvailable\":null},\"policy\":{\"publicApisOnly\":true,\"uiAutomation\":false,\"privateApis\":false"
+    },
+    "get_all_project_paths": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"pathCount\":149,\"paths\":[{\"path\":\"/Users/samuelwilkinson/Downloads/Higgsfield/a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"name\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"nodeId\":\"000f4241\",\"off"
+    },
+    "get_av_feature_support": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"schemaVersion\":1,\"supported\":{\"sequenceAvInspection\":{\"status\":\"supported\",\"backend\":\"cep\",\"fields\":[\"audioChannelCount\",\"audioChannelType\",\"audioSampleRate\",\"audioDisplayFormat\",\"autoToneMapEnabled\",\"compositeLinea"
+    },
+    "get_bin_contents": {
+      "verdict": "HONEST_ERROR",
+      "domain": "bins",
+      "tier": "T0_READ",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"TypeError: undefined is not an object\"}"
+    },
+    "get_bridge_telemetry": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"schemaVersion\":1,\"directoryAccessible\":true,\"pendingCommands\":0,\"pendingResponses\":0,\"busyOperations\":0,\"oldestPendingAgeMs\":null,\"healthy\":true,\"privacy\":\"Aggregate local bridge state only; no paths, filenames, scr"
+    },
+    "get_capabilities": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"schemaVersion\":1,\"runtime\":{\"platform\":\"darwin\",\"platformName\":\"macOS\",\"supported\":true,\"tempDirectory\":\"/var/folders/mt/1yhs9hwn3k350n76czrm8yjm0000gn/T/premiere-mcp-bridge\",\"nodeVersion\":\"v24.11.1\"},\"premiere\":{\"s"
+    },
+    "get_clip_adjustment_layer": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"clipName\":\"SPIKE-A\",\"isAdjustmentLayer\":false}}"
+    },
+    "get_clip_at_playhead": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"playheadSeconds\":0,\"clipCount\":1,\"clips\":[{\"nodeId\":\"000f4423\",\"name\":\"SPIKE-A\",\"trackType\":\"video\",\"trackIndex\":0,\"trackName\":\"Video 1\",\"clipIndex\":0,\"startSeconds\":0,\"endSeconds\":3,\"enabled\":true}]}}"
+    },
+    "get_clip_at_position": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"nodeId\":\"000f4423\",\"name\":\"SPIKE-A\",\"trackIndex\":0,\"trackType\":\"video\",\"start\":0,\"end\":3,\"duration\":3}}"
+    },
+    "get_clip_links": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"nodeId\":\"000f4423\",\"name\":\"SPIKE-A\",\"trackType\":\"video\",\"trackIndex\":0,\"linkedClips\":[],\"linkedCount\":0}}"
+    },
+    "get_clip_markers": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"markerCount\":0,\"markers\":[]}}"
+    },
+    "get_clip_properties": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"nodeId\":\"000f4423\",\"name\":\"SPIKE-A\",\"trackIndex\":0,\"trackType\":\"video\",\"clipIndex\":0,\"start\":0,\"end\":3,\"inPoint\":0,\"outPoint\":3,\"duration\":3,\"mediaType\":\"Video\",\"isSelected\":false,\"isSpeedReversed\":0,\"effects\":[{\"di"
+    },
+    "get_clip_speed": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"clipName\":\"SPIKE-A\",\"speed\":1,\"reversed\":false,\"speedReadSupported\":true,\"reversedReadSupported\":true,\"impliedRatioFromDuration\":1}}"
+    },
+    "get_color_label": {
+      "verdict": "WORKS",
+      "domain": "metadata",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"colorIndex\":3}}"
+    },
+    "get_color_space": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"colorSpace\":{\"empty\":false,\"isSceneReferred\":false,\"matrixEquation\":0,\"name\":\"Rec. 709\",\"primaries\":1,\"transferCharacteristic\":1},\"originalColorSpace\":{\"e"
+    },
+    "get_duplicate_media": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"duplicateGroupCount\":0,\"duplicates\":[]}}"
+    },
+    "get_effect_properties": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Effect not found: Gaussian Blur\"}"
+    },
+    "get_encoder_presets": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"count\":562,\"presets\":[{\"name\":\"Mobile Device 1080p HD\",\"path\":\"/Applications/Adobe Media Encoder 2026/Adobe Media Encoder 2026.app/Contents/MediaIO/systempresets/4E49434B_48323634/Mobile Device 1080p HD.epr\",\"format"
+    },
+    "get_export_file_extension": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"sequenceName\":\"PROBE-SCRATCH\",\"presetPath\":\"PROBE_TMP\"}}"
+    },
+    "get_footage_interpretation": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"alphaUsage\":0,\"fieldType\":-1,\"frameRate\":25,\"ignoreAlpha\":false,\"invertAlpha\":false,\"pixelAspectRatio\":1}}"
+    },
+    "get_full_clip_info": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"nodeId\":\"000f4423\",\"name\":\"SPIKE-A\",\"trackType\":\"video\",\"trackIndex\":0,\"clipIndex\":0,\"startSeconds\":0,\"endSeconds\":3,\"durationSeconds\":3,\"inPointSeconds\":0,\"outPointSeconds\":3,\"mediaType\":\"Video\",\"enabled\":true,\"spe"
+    },
+    "get_full_project_overview": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"projectName\":\"NEW PROJECT.prproj\",\"projectPath\":\"/Users/samuelwilkinson/Documents/Adobe/Premiere Pro (Beta)/26.0/NEW PROJECT.prproj\",\"totalItems\":155,\"offlineItems\":0,\"sequenceCount\":5,\"mediaFileTypes\":{\"png\":2,\"mp4"
+    },
+    "get_full_sequence_info": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"name\":\"PROBE-SCRATCH\",\"id\":\"080bc1b6-4cbf-44fe-977e-23fc3180c31c\",\"width\":1280,\"height\":720,\"durationSeconds\":6,\"frameRate\":{\"seconds\":0.04166666666667,\"ticks\":\"10584000000\"},\"audioSampleRate\":{\"seconds\":0.000020833"
+    },
+    "get_graphics_white_luminance": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"graphicsWhiteLuminance\":203}}"
+    },
+    "get_insertion_bin": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"name\":\"NEW PROJECT.prproj\",\"nodeId\":\"000f4240\",\"treePath\":\"\\\\NEW PROJECT.prproj\"}}"
+    },
+    "get_item_info": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"name\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"nodeId\":\"000f4241\",\"type\":\"sequence\",\"treePath\":\"\\\\NEW PROJECT.prproj\\\\Higgsfield\\\\a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"isSequence\":false"
+    },
+    "get_keyframes": {
+      "verdict": "HONEST_ERROR",
+      "domain": "keyframes",
+      "tier": "T0_READ",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Effect not found\"}"
+    },
+    "get_linked_items": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"clipName\":\"SPIKE-A\",\"linkedItems\":[],\"count\":0}}"
+    },
+    "get_metadata": {
+      "verdict": "WORKS",
+      "domain": "metadata",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"projectMetadata\":\"<?xpacket begin=\\\"﻿\\\" id=\\\"W5M0MpCehiHzreSzNTczkc9d\\\"?>\\n<x:xmpmeta xmlns:x=\\\"adobe:ns:meta/\\\" x:xmptk=\\\"Adobe XMP Core 10.0-c000 26.GD06.9d4b4c1, 2026/06/03-11:17:57        \\\">\\n   <rdf:RDF xmlns:"
+    },
+    "get_mogrt_component": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Not a MOGRT clip or no MGT component found\"}"
+    },
+    "get_next_edit_point": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"found\":true,\"direction\":\"next\",\"editPointSeconds\":3,\"playheadSeconds\":0}}"
+    },
+    "get_offline_media": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"offlineCount\":0,\"items\":[]}}"
+    },
+    "get_playhead_position": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"seconds\":0,\"ticks\":\"0\"}}"
+    },
+    "get_premiere_state": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"project\":{\"name\":\"NEW PROJECT.prproj\",\"path\":\"/Users/samuelwilkinson/Documents/Adobe/Premiere Pro (Beta)/26.0/NEW PROJECT.prproj\",\"rootItemCount\":153,\"sequenceCount\":5},\"sequences\":[{\"name\":\"PROBE-SCRATCH\",\"id\":\"080"
+    },
+    "get_project_info": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"name\":\"NEW PROJECT.prproj\",\"path\":\"/Users/samuelwilkinson/Documents/Adobe/Premiere Pro (Beta)/26.0/NEW PROJECT.prproj\",\"numSequences\":5,\"numItems\":153,\"activeSequence\":{\"name\":\"PROBE-SCRATCH\",\"id\":\"080bc1b6-4cbf-44f"
+    },
+    "get_project_item_info": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"nodeId\":\"000f4241\",\"name\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"type\":\"file\",\"treePath\":\"\\\\NEW PROJECT.prproj\\\\Higgsfield\\\\a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"mediaPath\":\"/Users/sa"
+    },
+    "get_project_panel_metadata": {
+      "verdict": "WORKS",
+      "domain": "metadata",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"metadata\":\"<?xml version='1.0'?>\\n<md.paths version='1.0'>\\n<metadata_path><internal>false</internal>\\n<namespace>http://amwa.tv/mxf/as/11/core/</namespace>\\n<description>audioTrackLayout</description>\\n<entry_name>"
+    },
+    "get_project_scratch_disks": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{}}"
+    },
+    "get_qe_clip_info": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "DENY",
+      "why": "wedges the CEP bridge; recovery is manual"
+    },
+    "get_render_queue_status": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"isRunning\":\"unknown\",\"info\":\"Check Adobe Media Encoder application for detailed queue status\"}}"
+    },
+    "get_selected_clips": {
+      "verdict": "WORKS",
+      "domain": "selection",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":[]}"
+    },
+    "get_sequence_count": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"count\":5}}"
+    },
+    "get_sequence_in_out_points": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"inSeconds\":-0.00000157470396,\"outSeconds\":-0.00000157470396}}"
+    },
+    "get_sequence_markers_by_type": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"type\":\"Comment\",\"count\":0,\"markers\":[]}}"
+    },
+    "get_sequence_settings": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"name\":\"PROBE-SCRATCH\",\"id\":\"080bc1b6-4cbf-44fe-977e-23fc3180c31c\",\"frameSizeHorizontal\":1280,\"frameSizeVertical\":720,\"timebase\":\"10584000000\",\"end\":6,\"videoTracks\":1,\"audioTracks\":1,\"audioChannelCount\":2,\"audioChann"
+    },
+    "get_sequence_structure": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"name\":\"PROBE-SCRATCH\",\"id\":\"080bc1b6-4cbf-44fe-977e-23fc3180c31c\",\"durationSeconds\":6,\"videoTrackCount\":1,\"audioTrackCount\":1,\"videoTracks\":[{\"index\":0,\"name\":\"Video 1\",\"clipCount\":2,\"clips\":[{\"index\":0,\"nodeId\":\"00"
+    },
+    "get_source_monitor_info": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"loaded\":true,\"nodeId\":\"000f4388\",\"name\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"mediaPath\":\"/Users/samuelwilkinson/Downloads/SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"inPoint\":0,\"outPoint\":3}}"
+    },
+    "get_source_monitor_position": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"seconds\":0,\"ticks\":\"0\"}}"
+    },
+    "get_target_tracks": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"video\":[{\"index\":0,\"name\":\"Video 1\"}],\"audio\":[{\"index\":0,\"name\":\"Audio 1\"}]}}"
+    },
+    "get_timeline_gaps": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"sequenceName\":\"PROBE-SCRATCH\",\"gapCount\":0,\"minGapSeconds\":0.04,\"gaps\":[]}}"
+    },
+    "get_timeline_summary": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"name\":\"PROBE-SCRATCH\",\"id\":\"080bc1b6-4cbf-44fe-977e-23fc3180c31c\",\"resolution\":\"1280x720\",\"durationSeconds\":6,\"frameRate\":{\"seconds\":0.04166666666667,\"ticks\":\"10584000000\"},\"playheadSeconds\":0,\"totalVideoClips\":2,\"t"
+    },
+    "get_total_clip_count": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"videoClips\":2,\"audioClips\":0,\"total\":2}}"
+    },
+    "get_track_info": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"name\":\"Video 1\",\"trackType\":\"video\",\"trackIndex\":0,\"clipCount\":2,\"isMuted\":false,\"isLocked\":false,\"isTargeted\":true,\"clips\":[{\"index\":0,\"nodeId\":\"000f4423\",\"name\":\"SPIKE-A\",\"startSeconds\":0,\"endSeconds\":3,\"durationS"
+    },
+    "get_unused_media": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"unusedCount\":6,\"items\":[{\"nodeId\":\"000f4241\",\"name\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"treePath\":\"\\\\NEW PROJECT.prproj\\\\Higgsfield\\\\a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"mediaPath"
+    },
+    "get_used_media_report": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"sequenceName\":\"PROBE-SCRATCH\",\"uniqueMediaCount\":2,\"offlineUsedCount\":0,\"media\":[{\"nodeId\":\"000f442a\",\"name\":\"SPIKE-A\",\"mediaPath\":\"///Users/samuelwilkinson/Downloads/ABDN-AI_4628_VID_002-V1_SQ01-SC04-B.mp4\",\"offlin"
+    },
+    "get_uxp_capabilities": {
+      "verdict": "THREW",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "handler threw"
+    },
+    "get_uxp_state": {
+      "verdict": "THREW",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "handler threw"
+    },
+    "get_value_at_time": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Effect not found\"}"
+    },
+    "get_version_info": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"version\":\"26.5.0\",\"buildNumber\":\"77\",\"isDocumentOpen\":true,\"path\":\"/Applications/Adobe Premiere Pro (Beta)/Adobe Premiere Pro (Beta).app/\"}}"
+    },
+    "get_work_area": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"TypeError: undefined is not an object\"}"
+    },
+    "get_workspaces": {
+      "verdict": "WORKS",
+      "domain": "ui",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"workspaces\":[\"All Panels\",\"Assembly\",\"Audio\",\"Captions and Graphics\",\"Color\",\"Editing\",\"Effects\",\"Essentials\",\"Learning\",\"Libraries\",\"Metalogging\",\"Prelude\",\"Production\",\"Review\",\"Starter\",\"Text-Based Editing\",\"Vert"
+    },
+    "get_xmp_metadata": {
+      "verdict": "WORKS",
+      "domain": "metadata",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"xmpMetadata\":\"<?xpacket begin=\\\"﻿\\\" id=\\\"W5M0MpCehiHzreSzNTczkc9d\\\"?>\\n<x:xmpmeta xmlns:x=\\\"adobe:ns:meta/\\\" x:xmptk=\\\"Adobe XMP Core 10.0-c000 26.GD06.9d"
+    },
+    "has_proxy": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"hasProxy\":false,\"canProxy\":false,\"proxyPath\":\"\"}}"
+    },
+    "import_ae_comps": {
+      "verdict": "UNWITNESSED",
+      "domain": "media",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'media' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"imported\":true,\"allComps\":true}}",
+      "rescored": true
+    },
+    "import_fcp_xml": {
+      "verdict": "SKIPPED",
+      "domain": "media",
+      "tier": "DENY",
+      "why": "calls app.openFCPXML() which opens the XML AS A NEW PROJECT (verified)"
+    },
+    "import_folder": {
+      "verdict": "SKIPPED",
+      "domain": "media",
+      "tier": "T3_SLOW",
+      "why": "slow / invokes AME"
+    },
+    "import_image_sequence": {
+      "verdict": "UNWITNESSED",
+      "domain": "media",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'media' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"imported\":true,\"file\":\"PROBE_TMP\",\"asImageSequence\":true}}",
+      "rescored": true
+    },
+    "import_media": {
+      "verdict": "WORKS",
+      "domain": "media",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"imported\":1,\"files\":[\"/Users/samuelwilkinson/Downloads/Higgsfield/a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\"]}}"
+    },
+    "import_mogrt": {
+      "verdict": "HONEST_ERROR",
+      "domain": "media",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Failed to import MOGRT\"}"
+    },
+    "import_mogrt_from_library": {
+      "verdict": "HONEST_ERROR",
+      "domain": "media",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Error: Not Enough Parameters\"}"
+    },
+    "import_sequences": {
+      "verdict": "HONEST_ERROR",
+      "domain": "media",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Error: Not Enough Parameters\"}"
+    },
+    "insert_from_source": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"No clip open in Source Monitor\"}"
+    },
+    "inspect_dom_object": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Cannot access: PROBE_TMP — ReferenceError: PROBE_TMP is undefined\"}"
+    },
+    "inspect_project_item_av_metadata": {
+      "verdict": "WORKS",
+      "domain": "metadata",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"nodeId\":\"000f4241\",\"color\":{\"effective\":{\"empty\":false,\"isSceneReferred\":false,\"matrixEquation\":0,\"name\":\"Rec. 709\",\"primaries\":1,\"transferCharacteristic\""
+    },
+    "inspect_project_recovery": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"project\":{\"name\":\"NEW PROJECT.prproj\",\"path\":\"/Users/samuelwilkinson/Documents/Adobe/Premiere Pro (Beta)/26.0/NEW PROJECT.prproj\",\"hasSavedPath\":true,\"fileExists\":true},\"unsavedChanges\":{\"status\":\"not_exposed\",\"dirt"
+    },
+    "inspect_sequence_av_settings": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"sequence\":\"PROBE-SCRATCH\",\"audio\":{\"channelCount\":2,\"channelType\":1,\"channelTypeLabels\":{\"0\":\"mono\",\"1\":\"stereo\",\"2\":\"5.1\",\"3\":\"multichannel\",\"4\":\"4-channel\",\"5\":\"8-channel\"},\"sampleRate\":{\"seconds\":0.00002083333333"
+    },
+    "invert_selection": {
+      "verdict": "UNWITNESSED",
+      "domain": "selection",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"nowSelected\":4,\"nowDeselected\":0}}",
+      "rescored": true
+    },
+    "is_work_area_enabled": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"ReferenceError: seq.isWorkAreaBarEnabled is not a function\"}"
+    },
+    "lift_selection": {
+      "verdict": "HONEST_ERROR",
+      "domain": "selection",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Lift failed: qeSeq.lift is not a function\"}"
+    },
+    "link_selection": {
+      "verdict": "UNWITNESSED",
+      "domain": "selection",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"linked\":true}}",
+      "rescored": true
+    },
+    "list_available_audio_effects": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":[]}"
+    },
+    "list_available_audio_transitions": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":[]}"
+    },
+    "list_available_effects": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":[]}"
+    },
+    "list_available_transitions": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":[{\"name\":\"Cross Dissolve\",\"source\":\"byName\"},{\"name\":\"Dip to Black\",\"source\":\"byName\"},{\"name\":\"Dip to White\",\"source\":\"byName\"},{\"name\":\"Film Dissolve\",\"source\":\"byName\"},{\"name\":\"Additive Dissolve\",\"source\":\"byName\""
+    },
+    "list_clip_effects": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"clipName\":\"SPIKE-A\",\"nodeId\":\"000f4423\",\"trackType\":\"video\",\"trackIndex\":0,\"componentCount\":2,\"components\":[{\"index\":0,\"displayName\":\"Opacity\",\"matchName\":\"AE.ADBE Opacity\",\"properties\":[{\"index\":0,\"displayName\":\"Op"
+    },
+    "list_markers": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":[]}"
+    },
+    "list_project_items": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":[{\"nodeId\":\"000f4386\",\"name\":\"Higgsfield\",\"type\":\"sequence\",\"mediaPath\":\"\"},{\"nodeId\":\"000f4388\",\"name\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"type\":\"sequence\",\"mediaPath\":\"/Users/samuelwilkinson/Downloads/SPGFX02B"
+    },
+    "list_sequence_tracks": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":[{\"index\":0,\"type\":\"video\",\"name\":\"Video 1\",\"numClips\":2,\"isMuted\":false,\"isLocked\":false},{\"index\":0,\"type\":\"audio\",\"name\":\"Audio 1\",\"numClips\":0,\"isMuted\":false}]}"
+    },
+    "list_sequences": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":[{\"name\":\"PROBE-SCRATCH\",\"id\":\"080bc1b6-4cbf-44fe-977e-23fc3180c31c\",\"videoTracks\":1,\"audioTracks\":1,\"inPoint\":null,\"end\":6},{\"name\":\"MCP-HARDEN-VERIFY\",\"id\":\"4a7ad025-41a9-4168-895b-75ecb145c692\",\"videoTracks\":3,\"aud"
+    },
+    "lock_track": {
+      "verdict": "UNWITNESSED",
+      "domain": "trackprops",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'trackprops' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"trackIndex\":0,\"locked\":false,\"trackName\":\"Video 1\"}}",
+      "rescored": true
+    },
+    "manage_proxies": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "T2_DESTRUCTIVE",
+      "why": "destroys project contents"
+    },
+    "match_frame": {
+      "verdict": "UNWITNESSED",
+      "domain": "playback",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'playback' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"clipName\":\"PROBE_TMP\",\"clipNodeId\":\"000f4431\",\"timelineSeconds\":0,\"sourceSeconds\":3600,\"sourceNodeId\":\"000f4241\",\"sourceName\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"sourceMediaPath\":\"/Users/samuelwil",
+      "rescored": true
+    },
+    "move_clip": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"move_clip cannot move clips on this Premiere build: the DOM accepted the start write without moving the clip (end/duration did not follow). The start property has been restored so timeline reads stay truthful. Land"
+    },
+    "move_clip_to_track": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Error: Not Enough Parameters\"}"
+    },
+    "move_item_to_bin": {
+      "verdict": "UNWITNESSED",
+      "domain": "bins",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'bins' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"moved\":true,\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"toBin\":\"PROBE_TMP\"}}",
+      "rescored": true
+    },
+    "move_items_to_bin": {
+      "verdict": "UNWITNESSED",
+      "domain": "bins",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'bins' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"moved\":1,\"total\":1,\"targetBin\":\"PROBE_TMP\"}}",
+      "rescored": true
+    },
+    "move_playhead_to_edit": {
+      "verdict": "UNWITNESSED",
+      "domain": "playback",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'playback' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"movedTo\":43200,\"direction\":\"next\"}}",
+      "rescored": true
+    },
+    "multiple_undo": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "DENY",
+      "why": "same"
+    },
+    "mute_track": {
+      "verdict": "UNWITNESSED",
+      "domain": "trackprops",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'trackprops' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"trackIndex\":0,\"muted\":false,\"trackName\":\"Audio 1\"}}",
+      "rescored": true
+    },
+    "nest_clips": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"nested\":true,\"name\":\"PROBE_TMP\",\"clipCount\":4}}"
+    },
+    "open_in_source": {
+      "verdict": "WORKS",
+      "domain": "srcmonitor",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"opened\":true,\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\"}}"
+    },
+    "open_project": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "DENY",
+      "why": "switches project mid-run"
+    },
+    "overwrite_clip": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"overwritten\":true,\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"trackIndex\":0,\"startSeconds\":0}}"
+    },
+    "overwrite_from_source": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"overwritten\":true,\"verified\":true,\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"atSeconds\":43200,\"newClips\":{\"video\":[{\"nodeId\":\"000f4439\",\"name\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\""
+    },
+    "ping": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"connected\":true,\"premiereVersion\":\"26.5.0\",\"projectName\":\"NEW PROJECT.prproj\",\"activeSequence\":\"PROBE-SCRATCH\"}}"
+    },
+    "play_source_monitor": {
+      "verdict": "UNWITNESSED",
+      "domain": "playback",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'playback' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"playing\":true,\"speed\":1}}",
+      "rescored": true
+    },
+    "play_timeline": {
+      "verdict": "UNWITNESSED",
+      "domain": "playback",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'playback' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"playing\":true}}",
+      "rescored": true
+    },
+    "preview_edit_plan": {
+      "verdict": "THREW",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "handler threw"
+    },
+    "razor_all_tracks": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"razored\":1,\"verified\":true,\"changedTracks\":[{\"trackType\":\"video\",\"trackIndex\":0}],\"atSeconds\":43200.375}}"
+    },
+    "redo": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "DENY",
+      "why": "same"
+    },
+    "refresh_media": {
+      "verdict": "UNWITNESSED",
+      "domain": "media",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'media' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"refreshed\":true,\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\"}}",
+      "rescored": true
+    },
+    "relink_media": {
+      "verdict": "SKIPPED",
+      "domain": "media",
+      "tier": "T2_DESTRUCTIVE",
+      "why": "destroys project contents"
+    },
+    "remove_all_effects": {
+      "verdict": "FABRICATES",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "asserts a positive outcome but nothing observable changed",
+      "reported": "{\"success\":true,\"data\":{\"removed\":true,\"clipName\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\"}}"
+    },
+    "remove_effect": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Effect not found: \"}"
+    },
+    "remove_effect_by_name": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Effect not found: Gaussian Blur\"}"
+    },
+    "remove_from_timeline": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"removed\":true,\"verified\":true,\"clipName\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\"}}"
+    },
+    "remove_keyframe": {
+      "verdict": "HONEST_ERROR",
+      "domain": "keyframes",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Effect not found\"}"
+    },
+    "remove_keyframe_range": {
+      "verdict": "HONEST_ERROR",
+      "domain": "keyframes",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Effect not found\"}"
+    },
+    "remove_selected_clips": {
+      "verdict": "UNWITNESSED",
+      "domain": "selection",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"removed\":0,\"ripple\":false}}",
+      "rescored": true
+    },
+    "rename_bin": {
+      "verdict": "HONEST_ERROR",
+      "domain": "bins",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Item is not a bin\"}"
+    },
+    "rename_clip": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Refusing to act: video track 0 has 1 gap(s), 1 of them before the target clip, and QE reports 4 items — matching neither the DOM clip count (2) nor DOM+gaps (3). clipIndex is a DOM index, so handing it to QE could "
+    },
+    "rename_project_item": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"oldName\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"newName\":\"PROBE_TMP\"}}"
+    },
+    "rename_track": {
+      "verdict": "UNWITNESSED",
+      "domain": "trackprops",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'trackprops' are outside what the snapshot observes (re-scored)",
+      "reported": "{\"success\":true,\"data\":{\"oldName\":\"Video 1\",\"newName\":\"PROBE_TMP\",\"trackType\":\"video\",\"trackIndex\":0}}",
+      "rescored": true
+    },
+    "replace_clip": {
+      "verdict": "WEDGES",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "bridge stopped responding after this call"
+    },
+    "search_project_items": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "returned data, world unchanged",
+      "reported": "{\"success\":true,\"data\":{\"resultCount\":100,\"maxResults\":100,\"items\":[{\"nodeId\":\"000f4386\",\"name\":\"Higgsfield\",\"type\":\"file\",\"treePath\":\"\\\\NEW PROJECT.prproj\\\\Higgsfield\",\"mediaPath\":\"\",\"offline\":false,\"colorLabel\":7},{\"nodeId\":\"000f4241\",\"na"
+    },
+    "validate_export_preset": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T0_READ",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Export preset must use the .epr extension\"}"
+    },
+    "verify_delivery_file": {
+      "verdict": "HONEST_ERROR",
+      "domain": "filesystem",
+      "tier": "T0_READ",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Delivery file does not exist: /Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\"}"
+    }
+  }
+}

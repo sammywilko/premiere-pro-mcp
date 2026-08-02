@@ -153,6 +153,34 @@ describe("sendCommand", () => {
     expect(mockedChmodSync).toHaveBeenCalledWith("/tmp/test-bridge", 0o700);
   });
 
+  it("turns the host's 'EvalScript error.' sentinel into an honest failure", async () => {
+    // A SYNTAX error never reaches the generated IIFE's try/catch, so ExtendScript returns the
+    // bare string "EvalScript error." and the panel wraps it as a SUCCESS carrying that string.
+    // Every honest-write guard in this codebase sits above this layer, so without this the
+    // parse-error case sails past all of them. Observed live 2026-08-02.
+    mockedExistsSync.mockImplementation(() => true);
+    mockedReadFileSync.mockReturnValue('{"success":true,"data":"EvalScript error."}');
+
+    const promise = sendCommand("var x = 1;", { tempDir: "/tmp/test-bridge" });
+    await vi.advanceTimersByTimeAsync(200);
+    const result = await promise;
+
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/failed to PARSE/i);
+    expect(result.error).toMatch(/reserved word/i);
+  });
+
+  it("does not mistake a normal string payload for the parse-error sentinel", async () => {
+    mockedExistsSync.mockImplementation(() => true);
+    mockedReadFileSync.mockReturnValue('{"success":true,"data":"EvalScript error handling is fine"}');
+
+    const promise = sendCommand("var x = 1;", { tempDir: "/tmp/test-bridge" });
+    await vi.advanceTimersByTimeAsync(200);
+    const result = await promise;
+
+    expect(result.success).toBe(true);
+  });
+
   it("writes command file as .jsx", async () => {
     mockedExistsSync.mockImplementation((path) => {
       if (String(path).includes("res_")) return true;

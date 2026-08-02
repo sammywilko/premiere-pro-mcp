@@ -217,6 +217,28 @@ async function pollForResponse(
         try {
           const raw = readFileSync(resFile, "utf-8");
           const result = JSON.parse(raw) as CommandResult;
+          // A SYNTAX error in the script never reaches the generated IIFE's try/catch, so it is
+          // not reported as an error at all: ExtendScript's evalScript returns the bare string
+          // "EvalScript error." and the panel wraps it as {success:true, data:"EvalScript error."}.
+          // Every honest-write guard in this codebase sits ABOVE this layer, so a parse failure
+          // would sail past all of them as a success carrying a string. Runtime errors are already
+          // honest (the IIFE catches them); this closes the parse-error hole.
+          if (
+            result &&
+            result.success &&
+            typeof result.data === "string" &&
+            /^\s*EvalScript error\.?\s*$/i.test(result.data)
+          ) {
+            finish({
+              success: false,
+              error:
+                "ExtendScript failed to PARSE the script (host returned 'EvalScript error.'). " +
+                "This is a syntax error, not a runtime one — the usual cause is ES3 invalidity: a " +
+                "reserved word used as a bare property name (protected/export/class/final/private/" +
+                "int/char...), a trailing comma, const/let, an arrow function, or a template literal.",
+            });
+            return;
+          }
           finish(result);
         } catch (e) {
           finish({
