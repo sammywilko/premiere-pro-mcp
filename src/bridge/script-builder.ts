@@ -550,12 +550,32 @@ function __qeSetSpeed(found, ratio, reverse) {
   var qeClip = qeTrack.getItemAt(found.clipIndex);
   if (!qeClip) return { ok: false, error: "QE clip not found at index " + found.clipIndex };
 
+  if (!isFinite(ratio) || ratio <= 0) {
+    return { ok: false, error: "Speed ratio must be a finite positive number (got " + ratio + "). A ratio of 0 would make the target duration Infinity." };
+  }
+
   var before = __clipGeometry(found.clip);
   var beforeReversed = null;
   try { beforeReversed = found.clip.isSpeedReversed() == 1; } catch (e) {}
 
   var beforeSpeed = null, speedReadable = false;
   try { beforeSpeed = found.clip.getSpeed(); speedReadable = true; } catch (e) {}
+
+  // Idempotence: if the clip already sits at the requested speed AND direction, every attempt
+  // below is a genuine no-op and the loop would report "changed nothing under any signature" —
+  // indistinguishable from a broken tool. Say so plainly instead (cf. move_clip's shortcut).
+  var revTarget = !!reverse;
+  if (speedReadable && beforeSpeed !== null &&
+      Math.abs(beforeSpeed - ratio) <= Math.max(0.0005, ratio * 0.02) &&
+      (beforeReversed === null || beforeReversed === revTarget)) {
+    return {
+      ok: true, signature: "already-at-target", tried: ["no call made — clip already at the requested speed/direction"],
+      before: before, after: before,
+      requestedRatio: ratio, observedSpeed: beforeSpeed,
+      observedRatioFromDuration: 1, ratioMatches: true, reversed: beforeReversed,
+      alreadyThere: true
+    };
+  }
 
   // The duration argument is TICKS-AS-STRING, like every other time value this codebase
   // hands Premiere. Passing a TIMECODE string parses to ~0 and clamps the clip to a single
@@ -573,8 +593,29 @@ function __qeSetSpeed(found, ratio, reverse) {
     { label: "ratio+durTicks+reverse",        run: function () { qeClip.setSpeed(ratio, targetDurTicks, reverse); } }
   ];
 
-  var tol = Math.max(0.01, ratio * 0.02);
+  // Tolerance must scale with the ratio. A flat 0.01 floor is ~1% at ratio 1 but ±100%
+  // at ratio 0.01 (a normal extreme-slow-mo ask), which would wave through a badly wrong
+  // landing exactly where precision matters most. Keep the floor at float-noise level only.
+  var tol = Math.max(0.0005, ratio * 0.02);
   var tried = [];
+
+  // Restores the clip to its pre-call state. MUST pass beforeReversed, not a literal false:
+  // restoring a reversed clip with reverse=false silently flips its playback direction while
+  // the duration check still reports "restored". Returns true only if BOTH duration and
+  // direction came back.
+  function restoreClip() {
+    try {
+      qeClip.setSpeed(1, originalDurTicks, beforeReversed === null ? false : beforeReversed, true, false);
+      var back = __clipGeometry(found.clip);
+      var backRev = null;
+      try { backRev = found.clip.isSpeedReversed() == 1; } catch (e) {}
+      var durBack = Math.abs(back.duration - before.duration) <= 0.0005;
+      var revBack = (beforeReversed === null || backRev === null) ? true : (backRev === beforeReversed);
+      return durBack && revBack;
+    } catch (e) { return false; }
+  }
+
+  var wrongLandings = [];
 
   for (var i = 0; i < attempts.length; i++) {
     var err = null;
@@ -591,11 +632,16 @@ function __qeSetSpeed(found, ratio, reverse) {
     var reverseMoved  = nowReversed !== null && nowReversed !== beforeReversed;
     var changed = speedMoved || durationMoved || reverseMoved;
 
-    var correct = speedReadable && nowSpeed !== null
+    var rateOk = speedReadable && nowSpeed !== null
       ? Math.abs(nowSpeed - ratio) <= tol
       : Math.abs((before.duration / Math.max(after.duration, 0.0001)) - ratio) <= tol;
+    // Direction is part of correctness, not just part of "did anything change". Without this
+    // a requested reverse could silently fail to apply while the call reported success.
+    var dirOk = (nowReversed === null) ? true : (nowReversed === revTarget);
+    var correct = rateOk && dirOk;
 
-    tried.push(attempts[i].label + (err ? " -> " + err : (changed ? (correct ? " -> CORRECT" : " -> WRONG") : " -> no-op")));
+    tried.push(attempts[i].label + (err ? " -> " + err
+      : (changed ? (correct ? " -> CORRECT" : (rateOk ? " -> WRONG DIRECTION" : " -> WRONG RATE")) : " -> no-op")));
 
     if (changed && correct) {
       return {
@@ -608,30 +654,37 @@ function __qeSetSpeed(found, ratio, reverse) {
     }
 
     if (changed && !correct) {
-      // It landed, at the wrong rate. There is no undo through this bridge (TRAP 6), so put
-      // the clip back ourselves rather than leaving damage behind — same posture as move_clip.
-      var restored = false;
-      try {
-        qeClip.setSpeed(1, originalDurTicks, false, true, false);
-        var back = __clipGeometry(found.clip);
-        restored = Math.abs(back.duration - before.duration) <= 0.0005;
-      } catch (e) {}
-      return {
-        ok: false,
-        error: "QE setSpeed landed at the WRONG rate via '" + attempts[i].label + "': requested ratio "
-          + ratio + ", clip reports speed " + nowSpeed + " and duration " + before.duration + "s -> "
-          + after.duration + "s. " + (restored
-              ? "The clip HAS been restored to its original duration."
-              : "RESTORE FAILED — fix this clip by hand in Effect Controls.")
-          + " Tried: " + tried.join(" | "),
-        restored: restored, tried: tried
-      };
+      // It landed, but wrong. Restore and CONTINUE to the next signature rather than aborting:
+      // attempts 1 and 2 differ by a 100x unit scale, so a wrong-units call is far more likely
+      // to move something at the wrong magnitude than to be a clean no-op. Aborting here made
+      // the later candidates unreachable in exactly the case the ladder exists for.
+      var restoredNow = restoreClip();
+      wrongLandings.push(attempts[i].label + " (speed " + nowSpeed + ", reversed " + nowReversed + ")"
+        + (restoredNow ? "" : " [RESTORE FAILED]"));
+      if (!restoredNow) {
+        return {
+          ok: false,
+          error: "QE setSpeed landed WRONG via '" + attempts[i].label + "' (requested ratio " + ratio
+            + ", clip reports speed " + nowSpeed + ", reversed " + nowReversed + ") and the clip could NOT be "
+            + "restored — duration " + before.duration + "s -> " + __clipGeometry(found.clip).duration
+            + "s. Fix this clip by hand in Effect Controls; there is no undo through this bridge. "
+            + "Tried: " + tried.join(" | "),
+          restored: false, tried: tried
+        };
+      }
+      // restored cleanly — refresh the baseline snapshot so the next attempt is judged against
+      // true current state rather than a stale one.
+      before = __clipGeometry(found.clip);
+      try { beforeSpeed = found.clip.getSpeed(); } catch (e) {}
+      try { beforeReversed = found.clip.isSpeedReversed() == 1; } catch (e) {}
     }
   }
 
   return {
     ok: false,
-    error: "QE setSpeed changed nothing under any known signature. Tried: " + tried.join(" | "),
+    error: "QE setSpeed did not land correctly under any known signature. "
+      + (wrongLandings.length ? "Wrong-but-restored landings: " + wrongLandings.join("; ") + ". " : "")
+      + "Tried: " + tried.join(" | "),
     tried: tried
   };
 }

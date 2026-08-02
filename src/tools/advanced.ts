@@ -122,9 +122,17 @@ export function getAdvancedTools(bridgeOptions: BridgeOptions) {
           // 2 args -> "Not Enough Parameters"; 3 args -> accepted but no-op. The 3-arg no-op is
           // most likely a UNIT problem: 0.5s in ticks is ~1.27e11, which as a FRAME COUNT is
           // absurd and clamps to nothing. So try frames as well as ticks, at arity 3/4/5.
+          // getSettings().videoFrameRate is a Time-LIKE OBJECT whose .ticks is ticks-per-FRAME,
+          // not a plain fps number — see utility.ts's parseFloat(applied.videoFrameRate.ticks).
+          // Treating it as a number yields NaN (and NaN < 1 is false, so a naive guard never
+          // fires), which would silently NaN out every frames-based attempt below.
           var rollFps = 25;
-          try { rollFps = app.project.activeSequence.getSettings().videoFrameRate; } catch (e) {}
-          if (!rollFps || rollFps < 1) rollFps = 25;
+          try {
+            var vfr = app.project.activeSequence.getSettings().videoFrameRate;
+            var tpf = parseFloat(vfr && vfr.ticks !== undefined ? vfr.ticks : vfr);
+            if (isFinite(tpf) && tpf > 0) rollFps = TICKS_PER_SECOND / tpf;
+          } catch (e) {}
+          if (!isFinite(rollFps) || rollFps < 1) rollFps = 25;
           var offsetFrames = Math.round(${args.offset_seconds} * rollFps);
 
           var rollAttempts = [
@@ -137,32 +145,66 @@ export function getAdvancedTools(bridgeOptions: BridgeOptions) {
             { label: "ticks+0+0",        run: function () { qeClip.roll(offsetTicks, 0, 0); } }
           ];
 
+          // "Something on the track moved" is NOT proof of a roll. Verify the TARGET clip's own
+          // end edge moved by the REQUESTED offset, in the right direction. Without this, a
+          // wrong-units signature that shifts some boundary by an arbitrary amount (or shifts a
+          // different cut entirely) would be reported as {rolled:true, verified:true}.
+          function edgeOf(snap, nodeId) {
+            for (var q = 0; q < snap.length; q++) if (snap[q].nodeId === nodeId) return snap[q];
+            return null;
+          }
+          var targetNode = result.clip.nodeId;
+          var wantDelta = ${args.offset_seconds};
+          var edgeTol = Math.max(1 / rollFps, 0.002);   // one frame
+
           var rollTried = [];
+          var prevTrack = beforeTrack;
           for (var r = 0; r < rollAttempts.length; r++) {
             var rErr = null;
             try { rollAttempts[r].run(); } catch (e) { rErr = String(e); }
             var afterTrack = snapTrack();
-            var moved = trackChanged(beforeTrack, afterTrack);
-            rollTried.push(rollAttempts[r].label + (rErr ? " -> " + rErr : (moved ? " -> MOVED" : " -> no-op")));
-            if (moved) {
-              var seqAfter = __ticksToSeconds(app.project.activeSequence.end);
-              // A true roll moves the shared boundary and leaves total duration alone.
-              var durationHeld = Math.abs(seqAfter - seqBefore) <= 0.0005;
+            // Compare against the PREVIOUS attempt's state, not a stale pre-loop baseline, so a
+            // sub-threshold residue from an earlier attempt is not misattributed to this one.
+            var moved = trackChanged(prevTrack, afterTrack);
+
+            if (!moved) {
+              rollTried.push(rollAttempts[r].label + (rErr ? " -> " + rErr : " -> no-op"));
+              continue;
+            }
+
+            var b = edgeOf(beforeTrack, targetNode), a = edgeOf(afterTrack, targetNode);
+            var gotDelta = (b && a) ? (a.end - b.end) : null;
+            var edgeOk = gotDelta !== null && Math.abs(gotDelta - wantDelta) <= edgeTol;
+            var seqAfter = __ticksToSeconds(app.project.activeSequence.end);
+            var durationHeld = Math.abs(seqAfter - seqBefore) <= 0.0005;
+
+            rollTried.push(rollAttempts[r].label + " -> MOVED (target edge delta "
+              + (gotDelta === null ? "clip not found" : gotDelta + "s vs requested " + wantDelta + "s") + ")");
+
+            if (edgeOk && durationHeld) {
               return __result({
-                rolled: true,
-                verified: true,
-                durationHeld: durationHeld,
-                warning: durationHeld ? undefined
-                  : "Sequence duration changed (" + seqBefore + "s -> " + seqAfter + "s) — a true roll holds it. This behaved more like a trim; inspect before trusting.",
+                rolled: true, verified: true, durationHeld: true,
                 clipName: result.clip.name,
-                offsetSeconds: ${args.offset_seconds},
+                requestedOffsetSeconds: wantDelta,
+                observedEdgeDeltaSeconds: gotDelta,
                 qeSignature: rollAttempts[r].label,
                 declaredArity: declaredArity,
                 attempts: rollTried,
-                beforeTrack: beforeTrack,
-                afterTrack: afterTrack
+                beforeTrack: beforeTrack, afterTrack: afterTrack
               });
             }
+
+            // Moved, but not a correct roll. There is no undo here — stop rather than stack
+            // further speculative signatures on top of an already-perturbed timeline.
+            return __error(
+              "roll_edit MUTATED THE TIMELINE BUT NOT AS REQUESTED via '" + rollAttempts[r].label + "': "
+              + (gotDelta === null
+                  ? "the target clip could not be found on the track afterwards"
+                  : "target clip's end moved " + gotDelta + "s, requested " + wantDelta + "s")
+              + (durationHeld ? "" : "; sequence duration also changed (" + seqBefore + "s -> " + seqAfter + "s), so this behaved like a trim, not a roll")
+              + ". The clip was NOT restored (QE offers no inverse for this call) — inspect and fix by hand. "
+              + "Tried: " + rollTried.join(" | ")
+            );
           }
 
           return __error(
