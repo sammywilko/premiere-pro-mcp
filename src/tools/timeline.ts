@@ -128,47 +128,88 @@ export function getTimelineTools(bridgeOptions: BridgeOptions) {
           if (!result) return __error("Clip not found: ${escapeForExtendScript(args.node_id)}");
 
           var clip = result.clip;
+          var clipName = clip.name;
           var before = __clipGeometry(clip);
           var beforeStartTicks = clip.start.ticks;
           var newStartTicks = __secondsToTicks(${args.new_start_seconds}).toString();
 
-          if (Math.abs(before.start - ${args.new_start_seconds}) < 0.0005) {
-            return __result({ moved: false, verified: true, clipName: clip.name, note: "Clip already starts at the requested time; nothing to do.", geometry: before });
+          ${args.new_track_index !== undefined ? `
+          // Validate the destination BEFORE touching anything. This check used to run AFTER
+          // the start write, so new_track_index:99 moved the clip in time and then returned
+          // "out of range" — a caller that treated the error as "nothing happened" and retried
+          // moved the clip twice. There is no undo through this bridge, so every precondition
+          // has to be settled while the timeline is still untouched.
+          var seq = app.project.activeSequence;
+          var targetTracks = result.trackType === "video" ? seq.videoTracks : seq.audioTracks;
+          if (${args.new_track_index} < 0 || ${args.new_track_index} >= targetTracks.numTracks) {
+            return __error("Target track index ${args.new_track_index} is out of range (valid 0.." + (targetTracks.numTracks - 1) + "). Nothing was changed.");
+          }
+          var trackMoveNeeded = result.trackIndex !== ${args.new_track_index};
+          ` : `
+          var trackMoveNeeded = false;
+          `}
+
+          var startMoveNeeded = Math.abs(before.start - ${args.new_start_seconds}) >= 0.0005;
+
+          // Short-circuit only when NOTHING is outstanding. The old check returned as soon as
+          // the start time already matched, which silently skipped a requested track move while
+          // still reporting verified:true — the clip never left its original track.
+          if (!startMoveNeeded && !trackMoveNeeded) {
+            return __result({ moved: false, verified: true, clipName: clipName, note: "Clip is already at the requested position; nothing to do.", geometry: before });
           }
 
-          clip.start = newStartTicks;
+          if (startMoveNeeded) {
+            clip.start = newStartTicks;
 
-          // A real move shifts the whole clip: start hits the target, end follows,
-          // duration is invariant. On builds where the DOM merely accepts the start
-          // write without moving the clip (observed live on 26.5), end/duration
-          // don't follow — restore the property so reads aren't poisoned, and fail.
-          var after = __clipGeometry(clip);
-          var startOk = Math.abs(after.start - ${args.new_start_seconds}) < 0.0005;
-          var durationOk = Math.abs(after.duration - before.duration) < 0.0005;
-          var endFollowed = Math.abs((after.end - before.end) - (after.start - before.start)) < 0.0005;
+            // A real move shifts the whole clip: start hits the target, end follows,
+            // duration is invariant. On builds where the DOM merely accepts the start
+            // write without moving the clip (observed live on 26.5), end/duration
+            // don't follow — restore the property so reads aren't poisoned, and fail.
+            var after = __clipGeometry(clip);
+            var startOk = Math.abs(after.start - ${args.new_start_seconds}) < 0.0005;
+            var durationOk = Math.abs(after.duration - before.duration) < 0.0005;
+            var endFollowed = Math.abs((after.end - before.end) - (after.start - before.start)) < 0.0005;
 
-          if (!startOk || !durationOk || !endFollowed) {
-            clip.start = beforeStartTicks;
-            return __error("move_clip cannot move clips on this Premiere build: the DOM accepted the start write without moving the clip (end/duration did not follow). The start property has been restored so timeline reads stay truthful. Land clips at their final position instead (e.g. overwrite_from_source), or move them in the UI.");
+            if (!startOk || !durationOk || !endFollowed) {
+              clip.start = beforeStartTicks;
+              return __error("move_clip cannot move clips on this Premiere build: the DOM accepted the start write without moving the clip (end/duration did not follow). The start property has been restored so timeline reads stay truthful. Land clips at their final position instead (e.g. overwrite_from_source), or move them in the UI.");
+            }
           }
 
           ${args.new_track_index !== undefined ? `
-          var seq = app.project.activeSequence;
-          var targetTracks = result.trackType === "video" ? seq.videoTracks : seq.audioTracks;
-          if (${args.new_track_index} >= targetTracks.numTracks) return __error("Target track index ${args.new_track_index} out of range (start-time move already applied and verified)");
-          clip.moveToTrack(targetTracks[${args.new_track_index}]);
-          var relocated = __findClip("${escapeForExtendScript(args.node_id)}");
-          if (!relocated || relocated.trackIndex !== ${args.new_track_index}) {
-            return __error("Start-time move applied and verified, but moveToTrack did not land the clip on track ${args.new_track_index} (clip is on track " + (relocated ? relocated.trackIndex : "unknown") + ").");
+          if (trackMoveNeeded) {
+            clip.moveToTrack(targetTracks[${args.new_track_index}]);
+            var relocated = __findClip("${escapeForExtendScript(args.node_id)}");
+            if (!relocated || relocated.trackIndex !== ${args.new_track_index}) {
+              // Roll the time write back so a failed call leaves no partial mutation behind.
+              // Re-resolve the clip first: after a moveToTrack attempt the original handle may
+              // be stale.
+              var restoredStart = false;
+              if (startMoveNeeded) {
+                try {
+                  var handle = relocated ? relocated.clip : clip;
+                  handle.start = beforeStartTicks;
+                  restoredStart = Math.abs(__clipGeometry(handle).start - before.start) < 0.0005;
+                } catch (e) {}
+              }
+              return __error("moveToTrack did not land the clip on track ${args.new_track_index} (clip is on track " + (relocated ? relocated.trackIndex : "unknown") + "). "
+                + (!startMoveNeeded
+                    ? "No start-time change was requested, so nothing was modified."
+                    : (restoredStart
+                        ? "The start-time move has been rolled back; nothing was modified."
+                        : "WARNING: the start-time move could NOT be rolled back — the clip is now at ${args.new_start_seconds}s on its ORIGINAL track. Fix it by hand; there is no undo through this bridge.")));
+            }
           }
           ` : ""}
 
+          var finalResult = __findClip("${escapeForExtendScript(args.node_id)}");
           return __result({
             moved: true,
             verified: true,
-            clipName: clip.name,
+            clipName: clipName,
             before: before,
-            after: __clipGeometry(clip)
+            after: finalResult ? __clipGeometry(finalResult.clip) : null,
+            trackIndex: finalResult ? finalResult.trackIndex : null
           });
         `);
         return sendCommand(script, bridgeOptions);
@@ -205,6 +246,29 @@ export function getTimelineTools(bridgeOptions: BridgeOptions) {
           var beforeInTicks = clip.inPoint.ticks;
           var beforeOutTicks = clip.outPoint.ticks;
 
+          // Reject an inverted or negative range BEFORE writing. Premiere clamps silently, and
+          // a clamped write followed by a "something changed" check reports success on a clip
+          // it has just collapsed.
+          ${args.new_in_seconds !== undefined ? `if (${args.new_in_seconds} < 0) return __error("new_in_seconds must be >= 0 (got ${args.new_in_seconds}). Nothing was changed.");` : ""}
+          ${args.new_out_seconds !== undefined ? `if (${args.new_out_seconds} < 0) return __error("new_out_seconds must be >= 0 (got ${args.new_out_seconds}). Nothing was changed.");` : ""}
+          ${
+            args.new_in_seconds !== undefined && args.new_out_seconds !== undefined
+              ? `if (${args.new_in_seconds} >= ${args.new_out_seconds}) return __error("new_in_seconds (${args.new_in_seconds}) must be less than new_out_seconds (${args.new_out_seconds}). Nothing was changed.");`
+              : ""
+          }
+
+          // Tolerance is one frame at the sequence rate: Premiere snaps source points to frame
+          // boundaries, so an exact-seconds comparison would false-alarm on 23.976/29.97.
+          // videoFrameRate is a Time-LIKE object whose .ticks is ticks-per-FRAME, not fps.
+          var trimFps = 25;
+          try {
+            var tvfr = app.project.activeSequence.getSettings().videoFrameRate;
+            var ttpf = parseFloat(tvfr && tvfr.ticks !== undefined ? tvfr.ticks : tvfr);
+            if (isFinite(ttpf) && ttpf > 0) trimFps = TICKS_PER_SECOND / ttpf;
+          } catch (e) {}
+          if (!isFinite(trimFps) || trimFps < 1) trimFps = 25;
+          var trimTol = Math.max(1 / trimFps, 0.002);
+
           ${args.new_in_seconds !== undefined ? `clip.inPoint = __secondsToTicks(${args.new_in_seconds}).toString();` : ""}
           ${args.new_out_seconds !== undefined ? `clip.outPoint = __secondsToTicks(${args.new_out_seconds}).toString();` : ""}
 
@@ -212,21 +276,56 @@ export function getTimelineTools(bridgeOptions: BridgeOptions) {
           var sourceChanged = Math.abs(after.inPoint - before.inPoint) > 0.0005 || Math.abs(after.outPoint - before.outPoint) > 0.0005;
           var footprintChanged = Math.abs(after.start - before.start) > 0.0005 || Math.abs(after.end - before.end) > 0.0005;
 
+          // Verifying only that SOMETHING changed is not verification. A request beyond the end
+          // of the source clamps, collapsing the clip toward a single frame — and both
+          // sourceChanged and footprintChanged are true for that, so it used to report
+          // trimmed:true on a destroyed clip. Compare each requested point with what landed.
+          var landedMismatch = null;
+          ${
+            args.new_in_seconds !== undefined
+              ? `if (Math.abs(after.inPoint - ${args.new_in_seconds}) > trimTol) landedMismatch = "in-point: asked for ${args.new_in_seconds}s, Premiere landed on " + after.inPoint + "s";`
+              : ""
+          }
+          ${
+            args.new_out_seconds !== undefined
+              ? `if (landedMismatch === null && Math.abs(after.outPoint - ${args.new_out_seconds}) > trimTol) landedMismatch = "out-point: asked for ${args.new_out_seconds}s, Premiere landed on " + after.outPoint + "s";`
+              : ""
+          }
+
+          function restoreSourceRange() {
+            try {
+              clip.inPoint = beforeInTicks;
+              clip.outPoint = beforeOutTicks;
+              var back = __clipGeometry(clip);
+              return Math.abs(back.inPoint - before.inPoint) <= 0.0005 && Math.abs(back.outPoint - before.outPoint) <= 0.0005;
+            } catch (e) { return false; }
+          }
+
           if (!sourceChanged && !footprintChanged) {
             return __error("trim wrote nothing — neither the source range nor the timeline footprint changed.");
+          }
+          if (landedMismatch !== null) {
+            var undone = restoreSourceRange();
+            return __error("trim was CLAMPED by Premiere, not applied as requested (" + landedMismatch
+              + "; the clip's source runs " + before.inPoint + "s to " + before.outPoint + "s). "
+              + (undone
+                  ? "The source range has been restored; nothing changed."
+                  : "WARNING: the range could NOT be restored — this clip is now " + after.duration + "s. Fix it by hand; there is no undo through this bridge."));
           }
           if (!footprintChanged) {
             // Source metadata moved but the cut did not (observed on stills on
             // 26.5). A half-landed write is worse than none — restore it.
-            clip.inPoint = beforeInTicks;
-            clip.outPoint = beforeOutTicks;
-            return __error("trim updated the clip's source range but the timeline cut did not move (known behaviour for stills on this build). The source range has been restored; nothing changed. To change a still's timeline length, land it at the desired duration instead (overwrite_from_source with a source in/out).");
+            var stillUndone = restoreSourceRange();
+            return __error("trim updated the clip's source range but the timeline cut did not move (known behaviour for stills on this build). "
+              + (stillUndone ? "The source range has been restored; nothing changed." : "WARNING: the source range could NOT be restored — inspect this clip by hand.")
+              + " To change a still's timeline length, land it at the desired duration instead (overwrite_from_source with a source in/out).");
           }
 
           return __result({
             trimmed: true,
             verified: true,
             clipName: clip.name,
+            toleranceSeconds: trimTol,
             before: before,
             after: after
           });

@@ -581,7 +581,19 @@ function __qeSetSpeed(found, ratio, reverse) {
   // hands Premiere. Passing a TIMECODE string parses to ~0 and clamps the clip to a single
   // frame — observed live 2026-08-02: a 3s clip became 0.04s with outPoint 3 -> 0.04, i.e.
   // it set duration and ignored speed entirely.
-  var targetDurTicks = __secondsToTicks(before.duration / ratio).toString();
+  //
+  // The target duration must be derived from the clip's SOURCE span, not from its current
+  // timeline duration. before.duration / ratio silently assumes the clip is at 100%: a 10s
+  // source already retimed to 200% occupies 5s, so requesting 100% would ask for a 5s clip
+  // at 1x — and Premiere honours that by DISCARDING half the source. getSpeed() then reports
+  // exactly the ratio we asked for, so the wrong landing verified as success and half the
+  // shot vanished silently. outPoint - inPoint is a direct measurement of the source span and
+  // is identical to before.duration on an un-retimed clip, so this changes nothing in the
+  // common case and fixes the retimed one.
+  var sourceSpan = before.outPoint - before.inPoint;
+  var spanUsable = isFinite(sourceSpan) && sourceSpan > 0.0005;
+  var spanBasis = spanUsable ? sourceSpan : before.duration;
+  var targetDurTicks = __secondsToTicks(spanBasis / ratio).toString();
   var originalDurTicks = __secondsToTicks(before.duration).toString();
 
   // Because we now SET duration explicitly, duration is no longer an independent witness —
@@ -632,9 +644,13 @@ function __qeSetSpeed(found, ratio, reverse) {
     var reverseMoved  = nowReversed !== null && nowReversed !== beforeReversed;
     var changed = speedMoved || durationMoved || reverseMoved;
 
+    // The duration-derived ratio must use the same SOURCE-span basis as targetDurTicks, or a
+    // correctly retimed clip reads as wrong. Note this fallback is weak evidence: this call
+    // sets the duration itself, so a signature that applied the duration and ignored the rate
+    // still satisfies it. It is flagged as such in the payload rather than passed off as proof.
     var rateOk = speedReadable && nowSpeed !== null
       ? Math.abs(nowSpeed - ratio) <= tol
-      : Math.abs((before.duration / Math.max(after.duration, 0.0001)) - ratio) <= tol;
+      : Math.abs((spanBasis / Math.max(after.duration, 0.0001)) - ratio) <= tol;
     // Direction is part of correctness, not just part of "did anything change". Without this
     // a requested reverse could silently fail to apply while the call reported success.
     var dirOk = (nowReversed === null) ? true : (nowReversed === revTarget);
@@ -648,7 +664,12 @@ function __qeSetSpeed(found, ratio, reverse) {
         ok: true, signature: attempts[i].label, tried: tried,
         before: before, after: after,
         requestedRatio: ratio, observedSpeed: nowSpeed,
-        observedRatioFromDuration: before.duration / Math.max(after.duration, 0.0001),
+        observedRatioFromDuration: spanBasis / Math.max(after.duration, 0.0001),
+        sourceSpanSeconds: spanUsable ? sourceSpan : null,
+        targetDurationSeconds: spanBasis / ratio,
+        rateWitness: (speedReadable && nowSpeed !== null)
+          ? "getSpeed()"
+          : "duration (WEAK — this call sets the duration, so it cannot independently prove the rate landed)",
         ratioMatches: true, reversed: nowReversed
       };
     }
