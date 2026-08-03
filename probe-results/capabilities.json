@@ -1,22 +1,22 @@
 {
-  "probedAt": "2026-08-02",
+  "probedAt": "2026-08-03",
   "premiere": "26.5.0",
   "note": "Verdicts are judged by observing Premiere before/after, never by the tool's own report. UNWITNESSED means the prober could not see the tool's domain — it is 'unknown', not 'broken'.",
   "summary": {
-    "WORKS": 90,
-    "FABRICATES": 5,
-    "WEDGES": 1,
-    "NOOP_REPORTED_OK": 2,
+    "WORKS": 91,
+    "CRASHES": 1,
+    "FABRICATES": 2,
+    "NOOP_REPORTED_OK": 1,
     "UNWITNESSED": 26,
-    "HONEST_ERROR": 49,
+    "HONEST_ERROR": 52,
     "THREW": 3,
     "UNTESTABLE": 1,
-    "SKIPPED": 25
+    "SKIPPED": 27
   },
   "totals": {
-    "registered": 202,
+    "registered": 204,
     "probed": 176,
-    "unprobed": 26
+    "unprobed": 28
   },
   "tools": {
     "add_adjustment_layer": {
@@ -36,9 +36,8 @@
       "verdict": "UNWITNESSED",
       "domain": "metadata",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'metadata' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"added\":true,\"name\":\"PROBE_TMP\",\"label\":\"PROBE_TMP\"}}",
-      "rescored": true
+      "why": "reported success; changes to 'metadata' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"added\":true,\"name\":\"PROBE_TMP\",\"label\":\"PROBE_TMP\"}}"
     },
     "add_keyframe": {
       "verdict": "HONEST_ERROR",
@@ -58,9 +57,8 @@
       "verdict": "UNWITNESSED",
       "domain": "projectitem",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'projectitem' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"added\":true,\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"timeSeconds\":1}}",
-      "rescored": true
+      "why": "reported success; changes to 'projectitem' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"added\":true,\"item\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"timeSeconds\":1}}"
     },
     "add_text_overlay": {
       "verdict": "HONEST_ERROR",
@@ -80,7 +78,7 @@
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"added\":true,\"verified\":true,\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"trackIndex\":0,\"startSeconds\":0,\"newClips\":{\"video\":[{\"nodeId\":\"000f4431\",\"name\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f9"
+      "reported": "{\"success\":true,\"data\":{\"added\":true,\"verified\":true,\"item\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"trackIndex\":0,\"startSeconds\":0,\"newClips\":{\"video\":[{\"nodeId\":\"000f443d\",\"name\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"start\":0,\"end\":3"
     },
     "add_track": {
       "verdict": "HONEST_ERROR",
@@ -122,7 +120,7 @@
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "errored, world unchanged",
-      "reported": "{\"success\":false,\"error\":\"Error: Unknown error exception\"}"
+      "reported": "{\"success\":false,\"error\":\"Refusing to act: video track 0 has 1 gap(s), 1 of them before the target clip, and QE reports 1 items — matching neither the DOM clip count (2) nor DOM+gaps (3). clipIndex is a DOM index, so handing it to QE could "
     },
     "apply_edit_plan": {
       "verdict": "HONEST_ERROR",
@@ -135,22 +133,21 @@
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "errored, world unchanged",
-      "reported": "{\"success\":false,\"error\":\"Effect not found: Gaussian Blur\"}"
+      "reported": "{\"success\":false,\"error\":\"Refusing to act: video track 0 has 1 gap(s), 1 of them before the target clip, and QE reports 4 items — matching neither the DOM clip count (2) nor DOM+gaps (3). clipIndex is a DOM index, so handing it to QE could "
     },
     "apply_lut": {
       "verdict": "HONEST_ERROR",
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "errored, world unchanged",
-      "reported": "{\"success\":false,\"error\":\"Could not apply Lumetri Color effect\"}"
+      "reported": "{\"success\":false,\"error\":\"Refusing to act: video track 0 has 1 gap(s), 1 of them before the target clip, and QE reports 4 items — matching neither the DOM clip count (2) nor DOM+gaps (3). clipIndex is a DOM index, so handing it to QE could "
     },
     "attach_custom_property": {
       "verdict": "UNWITNESSED",
       "domain": "metadata",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'metadata' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"attached\":true,\"propertyId\":\"PROBE_TMP\",\"value\":\"PROBE_TMP\"}}",
-      "rescored": true
+      "why": "reported success; changes to 'metadata' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"attached\":true,\"propertyId\":\"PROBE_TMP\",\"value\":\"PROBE_TMP\"}}"
     },
     "auto_reframe_sequence": {
       "verdict": "SKIPPED",
@@ -184,15 +181,14 @@
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"renamed\":4,\"verified\":true,\"attempted\":4,\"failures\":[],\"pattern\":\"PROBE_TMP\"}}"
+      "reported": "{\"success\":true,\"data\":{\"renamed\":1,\"verified\":true,\"attempted\":2,\"failures\":[{\"clipIndex\":1,\"name\":\"PROBE_TMP\",\"error\":\"Refusing to act: video track 0 has 1 gap(s), 1 of them before the target clip, and QE reports 4 items — matching neithe"
     },
     "capture_frame": {
       "verdict": "UNWITNESSED",
       "domain": "filesystem",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'filesystem' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"captured\":true,\"mimeType\":\"image/png\",\"base64\":\"iVBORw0KGgoAAAANSUhEUgAABQAAAALQCAIAAABAH0oBAAAJRGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV",
-      "rescored": true
+      "why": "reported success; changes to 'filesystem' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"captured\":true,\"mimeType\":\"image/png\",\"base64\":\"iVBORw0KGgoAAAANSUhEUgAAB4AAAAQ4CAIAAABnsVYUAAAJP2lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV"
     },
     "check_offline_media": {
       "verdict": "WORKS",
@@ -205,9 +201,8 @@
       "verdict": "UNWITNESSED",
       "domain": "projectitem",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'projectitem' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"clearedIn\":true,\"clearedOut\":true}}",
-      "rescored": true
+      "why": "reported success; changes to 'projectitem' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"item\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"clearedIn\":true,\"clearedOut\":true}}"
     },
     "clear_sequence_in_out": {
       "verdict": "HONEST_ERROR",
@@ -235,18 +230,18 @@
       "why": "destroys project contents"
     },
     "close_source_monitor": {
-      "verdict": "FABRICATES",
+      "verdict": "WORKS",
       "domain": "srcmonitor",
       "tier": "T1_WRITE",
-      "why": "asserts a positive outcome but nothing observable changed",
+      "why": "reported success and the world moved",
       "reported": "{\"success\":true,\"data\":{\"closed\":true}}"
     },
     "color_correct": {
-      "verdict": "FABRICATES",
+      "verdict": "HONEST_ERROR",
       "domain": "timeline",
       "tier": "T1_WRITE",
-      "why": "asserts a positive outcome but nothing observable changed",
-      "reported": "{\"success\":true,\"data\":{\"colorCorrected\":true,\"clipName\":\"PROBE_TMP\",\"changes\":{},\"errors\":{}}}"
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Refusing to act: video track 0 has 1 gap(s), 1 of them before the target clip, and QE reports 4 items — matching neither the DOM clip count (2) nor DOM+gaps (3). clipIndex is a DOM index, so handing it to QE could "
     },
     "consolidate_and_transfer": {
       "verdict": "SKIPPED",
@@ -268,11 +263,11 @@
       "reported": "{\"success\":false,\"error\":\"Effect not found on source clip: Gaussian Blur\"}"
     },
     "copy_effects_between_clips": {
-      "verdict": "NOOP_REPORTED_OK",
+      "verdict": "HONEST_ERROR",
       "domain": "timeline",
       "tier": "T1_WRITE",
-      "why": "returned success for a no-op; its payload is honest about having done nothing",
-      "reported": "{\"success\":true,\"data\":{\"copiedEffects\":0,\"source\":\"PROBE_TMP\",\"target\":\"PROBE_TMP\"}}"
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Refusing to act: video track 0 has 1 gap(s), 1 of them before the target clip, and QE reports 4 items — matching neither the DOM clip count (2) nor DOM+gaps (3). clipIndex is a DOM index, so handing it to QE could "
     },
     "create_bars_and_tone": {
       "verdict": "HONEST_ERROR",
@@ -286,7 +281,7 @@
       "domain": "bins",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"nodeId\":\"000f4432\"}}"
+      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"nodeId\":\"000f443e\"}}"
     },
     "create_caption_track": {
       "verdict": "HONEST_ERROR",
@@ -306,14 +301,14 @@
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"id\":\"f7024c69-f6aa-4213-a43d-d5992e2362b7\",\"presetUsed\":\"/Applications/Adobe Premiere Pro (Beta)/Adobe Premiere Pro (Beta).app/Contents/Settings/SequencePresets/UHD (4K)/UHD (4K) 21"
+      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"id\":\"490dec86-2fba-41f1-9d3e-6c5e07b4c7f6\",\"presetUsed\":\"/Applications/Adobe Premiere Pro (Beta)/Adobe Premiere Pro (Beta).app/Contents/Settings/SequencePresets/UHD (4K)/UHD (4K) 21"
     },
     "create_sequence_from_clips": {
       "verdict": "WORKS",
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"id\":\"23c3c7ff-eb07-403b-8630-0bbf533679d2\",\"clipCount\":1}}"
+      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"id\":\"a2db7766-ba4d-482b-a772-cc842e1dc6e6\",\"clipCount\":1}}"
     },
     "create_sequence_from_preset": {
       "verdict": "HONEST_ERROR",
@@ -334,14 +329,14 @@
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"source\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\"}}"
+      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"source\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\"}}"
     },
     "create_subsequence": {
-      "verdict": "WORKS",
+      "verdict": "HONEST_ERROR",
       "domain": "timeline",
       "tier": "T1_WRITE",
-      "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE-SCRATCH_Sub_01\",\"id\":\"9c10a664-81a2-48d9-bc86-30c61e43600a\"}}"
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Failed to create subsequence\"}"
     },
     "delete_bin": {
       "verdict": "SKIPPED",
@@ -350,11 +345,11 @@
       "why": "destroys project contents"
     },
     "delete_marker": {
-      "verdict": "HONEST_ERROR",
+      "verdict": "WORKS",
       "domain": "timeline",
       "tier": "T1_WRITE",
-      "why": "errored, world unchanged",
-      "reported": "{\"success\":false,\"error\":\"No marker found at 1s\"}"
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"deleted\":true,\"timeSeconds\":1}}"
     },
     "delete_multiple_project_items": {
       "verdict": "SKIPPED",
@@ -391,9 +386,8 @@
       "verdict": "UNWITNESSED",
       "domain": "selection",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'selection' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"deselected\":4}}",
-      "rescored": true
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"deselected\":2}}"
     },
     "detach_proxy": {
       "verdict": "SKIPPED",
@@ -459,25 +453,22 @@
       "verdict": "UNWITNESSED",
       "domain": "filesystem",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'filesystem' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"outputPath\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\",\"format\":\"FCP XML\"}}",
-      "rescored": true
+      "why": "reported success; changes to 'filesystem' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"outputPath\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\",\"format\":\"FCP XML\"}}"
     },
     "export_as_project": {
       "verdict": "UNWITNESSED",
       "domain": "filesystem",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'filesystem' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"path\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\"}}",
-      "rescored": true
+      "why": "reported success; changes to 'filesystem' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"path\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\"}}"
     },
     "export_frame": {
       "verdict": "UNWITNESSED",
       "domain": "filesystem",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'filesystem' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"outputPath\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\",\"method\":\"ame\"}}",
-      "rescored": true
+      "why": "reported success; changes to 'filesystem' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"outputPath\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\",\"method\":\"ame\"}}"
     },
     "export_frame_uxp": {
       "verdict": "HONEST_ERROR",
@@ -489,9 +480,8 @@
       "verdict": "UNWITNESSED",
       "domain": "filesystem",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'filesystem' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"outputPath\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\",\"format\":\"OMF\"}}",
-      "rescored": true
+      "why": "reported success; changes to 'filesystem' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"outputPath\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\",\"format\":\"OMF\"}}"
     },
     "export_sequence": {
       "verdict": "SKIPPED",
@@ -503,9 +493,8 @@
       "verdict": "UNWITNESSED",
       "domain": "selection",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'selection' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"extracted\":true}}",
-      "rescored": true
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"extracted\":true}}"
     },
     "find_items_by_media_path": {
       "verdict": "WORKS",
@@ -526,7 +515,7 @@
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"path\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\",\"method\":\"ame\",\"atSeconds\":0,\"note\":\"Frame exported and imported. Add to timeline with add_to_ti"
+      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"path\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\",\"method\":\"ame\",\"atSeconds\":1,\"note\":\"Frame exported and imported. Add to timeline with add_to_ti"
     },
     "get_active_sequence": {
       "verdict": "WORKS",
@@ -977,9 +966,8 @@
       "verdict": "UNWITNESSED",
       "domain": "media",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'media' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"imported\":true,\"allComps\":true}}",
-      "rescored": true
+      "why": "reported success; changes to 'media' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"imported\":true,\"allComps\":true}}"
     },
     "import_fcp_xml": {
       "verdict": "SKIPPED",
@@ -997,16 +985,15 @@
       "verdict": "UNWITNESSED",
       "domain": "media",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'media' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"imported\":true,\"file\":\"PROBE_TMP\",\"asImageSequence\":true}}",
-      "rescored": true
+      "why": "reported success; changes to 'media' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"imported\":true,\"file\":\"PROBE_TMP\",\"asImageSequence\":true}}"
     },
     "import_media": {
       "verdict": "WORKS",
       "domain": "media",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"imported\":1,\"files\":[\"/Users/samuelwilkinson/Downloads/Higgsfield/a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\"]}}"
+      "reported": "{\"success\":true,\"data\":{\"imported\":1,\"files\":[\"/Users/samuelwilkinson/Downloads/SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\"]}}"
     },
     "import_mogrt": {
       "verdict": "HONEST_ERROR",
@@ -1068,9 +1055,8 @@
       "verdict": "UNWITNESSED",
       "domain": "selection",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'selection' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"nowSelected\":4,\"nowDeselected\":0}}",
-      "rescored": true
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"nowSelected\":2,\"nowDeselected\":0}}"
     },
     "is_work_area_enabled": {
       "verdict": "HONEST_ERROR",
@@ -1090,9 +1076,8 @@
       "verdict": "UNWITNESSED",
       "domain": "selection",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'selection' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"linked\":true}}",
-      "rescored": true
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"linked\":true}}"
     },
     "list_available_audio_effects": {
       "verdict": "WORKS",
@@ -1161,9 +1146,8 @@
       "verdict": "UNWITNESSED",
       "domain": "trackprops",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'trackprops' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"trackIndex\":0,\"locked\":false,\"trackName\":\"Video 1\"}}",
-      "rescored": true
+      "why": "reported success; changes to 'trackprops' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"trackIndex\":0,\"locked\":false,\"trackName\":\"PROBE_TMP\"}}"
     },
     "manage_proxies": {
       "verdict": "SKIPPED",
@@ -1175,9 +1159,8 @@
       "verdict": "UNWITNESSED",
       "domain": "playback",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'playback' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"clipName\":\"PROBE_TMP\",\"clipNodeId\":\"000f4431\",\"timelineSeconds\":0,\"sourceSeconds\":3600,\"sourceNodeId\":\"000f4241\",\"sourceName\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"sourceMediaPath\":\"/Users/samuelwil",
-      "rescored": true
+      "why": "reported success; changes to 'playback' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"clipName\":\"PROBE_TMP\",\"clipNodeId\":\"000f443d\",\"timelineSeconds\":1,\"sourceSeconds\":1,\"sourceNodeId\":\"000f4388\",\"sourceName\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"sourceMediaPath\":\"/Users/samuelwilkinson/Downloads"
     },
     "move_clip": {
       "verdict": "HONEST_ERROR",
@@ -1191,31 +1174,28 @@
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "errored, world unchanged",
-      "reported": "{\"success\":false,\"error\":\"Error: Not Enough Parameters\"}"
+      "reported": "{\"success\":false,\"error\":\"Refusing to act: video track 0 has 1 gap(s), 1 of them before the target clip, and QE reports 4 items — matching neither the DOM clip count (2) nor DOM+gaps (3). clipIndex is a DOM index, so handing it to QE could "
     },
     "move_item_to_bin": {
       "verdict": "UNWITNESSED",
       "domain": "bins",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'bins' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"moved\":true,\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"toBin\":\"PROBE_TMP\"}}",
-      "rescored": true
+      "why": "reported success; changes to 'bins' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"moved\":true,\"item\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"toBin\":\"PROBE_TMP\"}}"
     },
     "move_items_to_bin": {
       "verdict": "UNWITNESSED",
       "domain": "bins",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'bins' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"moved\":1,\"total\":1,\"targetBin\":\"PROBE_TMP\"}}",
-      "rescored": true
+      "why": "reported success; changes to 'bins' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"moved\":1,\"total\":1,\"targetBin\":\"PROBE_TMP\"}}"
     },
     "move_playhead_to_edit": {
       "verdict": "UNWITNESSED",
       "domain": "playback",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'playback' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"movedTo\":43200,\"direction\":\"next\"}}",
-      "rescored": true
+      "why": "reported success; changes to 'playback' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"movedTo\":3,\"direction\":\"next\"}}"
     },
     "multiple_undo": {
       "verdict": "SKIPPED",
@@ -1227,23 +1207,22 @@
       "verdict": "UNWITNESSED",
       "domain": "trackprops",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'trackprops' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"trackIndex\":0,\"muted\":false,\"trackName\":\"Audio 1\"}}",
-      "rescored": true
+      "why": "reported success; changes to 'trackprops' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"trackIndex\":0,\"muted\":false,\"trackName\":\"Audio 1\"}}"
     },
     "nest_clips": {
       "verdict": "WORKS",
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"nested\":true,\"name\":\"PROBE_TMP\",\"clipCount\":4}}"
+      "reported": "{\"success\":true,\"data\":{\"nested\":true,\"name\":\"PROBE_TMP\",\"clipCount\":2}}"
     },
     "open_in_source": {
       "verdict": "WORKS",
       "domain": "srcmonitor",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"opened\":true,\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\"}}"
+      "reported": "{\"success\":true,\"data\":{\"opened\":true,\"item\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\"}}"
     },
     "open_project": {
       "verdict": "SKIPPED",
@@ -1256,14 +1235,14 @@
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"overwritten\":true,\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"trackIndex\":0,\"startSeconds\":0}}"
+      "reported": "{\"success\":true,\"data\":{\"overwritten\":true,\"item\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"trackIndex\":0,\"startSeconds\":0}}"
     },
     "overwrite_from_source": {
       "verdict": "WORKS",
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"overwritten\":true,\"verified\":true,\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"atSeconds\":43200,\"newClips\":{\"video\":[{\"nodeId\":\"000f4439\",\"name\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\""
+      "reported": "{\"success\":true,\"data\":{\"overwritten\":true,\"verified\":true,\"item\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"atSeconds\":3,\"newClips\":{\"video\":[{\"nodeId\":\"000f4443\",\"name\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"start\":3,\"end\":11,\"duration\""
     },
     "ping": {
       "verdict": "WORKS",
@@ -1276,17 +1255,15 @@
       "verdict": "UNWITNESSED",
       "domain": "playback",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'playback' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"playing\":true,\"speed\":1}}",
-      "rescored": true
+      "why": "reported success; changes to 'playback' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"playing\":true,\"speed\":1}}"
     },
     "play_timeline": {
       "verdict": "UNWITNESSED",
       "domain": "playback",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'playback' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"playing\":true}}",
-      "rescored": true
+      "why": "reported success; changes to 'playback' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"playing\":true}}"
     },
     "preview_edit_plan": {
       "verdict": "THREW",
@@ -1295,11 +1272,11 @@
       "why": "handler threw"
     },
     "razor_all_tracks": {
-      "verdict": "WORKS",
+      "verdict": "HONEST_ERROR",
       "domain": "timeline",
       "tier": "T1_WRITE",
-      "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"razored\":1,\"verified\":true,\"changedTracks\":[{\"trackType\":\"video\",\"trackIndex\":0}],\"atSeconds\":43200.375}}"
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Razor produced no new clips on any track — the QE razor is a no-op on this Premiere build (verified live 2026-08-01). Construct splits by landing sub-ranges through the Source Monitor instead (open_in_source -> set"
     },
     "redo": {
       "verdict": "SKIPPED",
@@ -1311,9 +1288,8 @@
       "verdict": "UNWITNESSED",
       "domain": "media",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'media' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"refreshed\":true,\"item\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\"}}",
-      "rescored": true
+      "why": "reported success; changes to 'media' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"refreshed\":true,\"item\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\"}}"
     },
     "relink_media": {
       "verdict": "SKIPPED",
@@ -1322,11 +1298,11 @@
       "why": "destroys project contents"
     },
     "remove_all_effects": {
-      "verdict": "FABRICATES",
+      "verdict": "HONEST_ERROR",
       "domain": "timeline",
       "tier": "T1_WRITE",
-      "why": "asserts a positive outcome but nothing observable changed",
-      "reported": "{\"success\":true,\"data\":{\"removed\":true,\"clipName\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\"}}"
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Refusing to act: video track 0 has 1 gap(s), 1 of them before the target clip, and QE reports 5 items — matching neither the DOM clip count (3) nor DOM+gaps (4). clipIndex is a DOM index, so handing it to QE could "
     },
     "remove_effect": {
       "verdict": "HONEST_ERROR",
@@ -1347,7 +1323,7 @@
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"removed\":true,\"verified\":true,\"clipName\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\"}}"
+      "reported": "{\"success\":true,\"data\":{\"removed\":true,\"verified\":true,\"clipName\":\"PROBE_TMP\"}}"
     },
     "remove_keyframe": {
       "verdict": "HONEST_ERROR",
@@ -1367,9 +1343,8 @@
       "verdict": "UNWITNESSED",
       "domain": "selection",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'selection' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"removed\":0,\"ripple\":false}}",
-      "rescored": true
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"removed\":0,\"ripple\":false}}"
     },
     "rename_bin": {
       "verdict": "HONEST_ERROR",
@@ -1379,32 +1354,43 @@
       "reported": "{\"success\":false,\"error\":\"Item is not a bin\"}"
     },
     "rename_clip": {
-      "verdict": "HONEST_ERROR",
+      "verdict": "WORKS",
       "domain": "timeline",
       "tier": "T1_WRITE",
-      "why": "errored, world unchanged",
-      "reported": "{\"success\":false,\"error\":\"Refusing to act: video track 0 has 1 gap(s), 1 of them before the target clip, and QE reports 4 items — matching neither the DOM clip count (2) nor DOM+gaps (3). clipIndex is a DOM index, so handing it to QE could "
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"renamed\":true,\"oldName\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"newName\":\"PROBE_TMP\"}}"
     },
     "rename_project_item": {
       "verdict": "WORKS",
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"oldName\":\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\",\"newName\":\"PROBE_TMP\"}}"
+      "reported": "{\"success\":true,\"data\":{\"oldName\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"newName\":\"PROBE_TMP\"}}"
     },
     "rename_track": {
       "verdict": "UNWITNESSED",
       "domain": "trackprops",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'trackprops' are outside what the snapshot observes (re-scored)",
-      "reported": "{\"success\":true,\"data\":{\"oldName\":\"Video 1\",\"newName\":\"PROBE_TMP\",\"trackType\":\"video\",\"trackIndex\":0}}",
-      "rescored": true
+      "why": "reported success; changes to 'trackprops' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"oldName\":\"PROBE_TMP\",\"newName\":\"PROBE_TMP\",\"trackType\":\"video\",\"trackIndex\":0}}"
     },
     "replace_clip": {
-      "verdict": "WEDGES",
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "DENY",
+      "why": "wedges the CEP bridge (observed); recovery is manual"
+    },
+    "replace_clip_media": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "T2_DESTRUCTIVE",
+      "why": "destroys project contents"
+    },
+    "reverse_clip": {
+      "verdict": "CRASHES",
       "domain": "timeline",
       "tier": "T1_WRITE",
-      "why": "bridge stopped responding after this call"
+      "why": "PREMIERE PROCESS DIED — SIGABRT / DoThrowNullPtrException (crash report confirmed); originally mislabelled WEDGES"
     },
     "search_project_items": {
       "verdict": "WORKS",

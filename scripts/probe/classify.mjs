@@ -15,9 +15,13 @@ export const DENY = {
   // Verified live 2026-08-02: hangs 30s, kills the CEP bridge, and recovery is a HUMAN action
   // (Window -> Extensions -> MCP Bridge). One call would end the probe run.
   get_qe_clip_info: "wedges the CEP bridge; recovery is manual",
-  // Second wedging tool, found by this prober 2026-08-02: the bridge stopped answering ping
-  // immediately after the call and required Window > Extensions > MCP Bridge to recover.
-  replace_clip: "wedges the CEP bridge (observed); recovery is manual",
+  // 💀 CRASHES PREMIERE. Both of these took the whole application down with an IDENTICAL
+  // signature — EXC_CRASH / SIGABRT via dvacore::config::DoThrowNullPtrException -> Panic ->
+  // Abort — confirmed against ~/Library/Logs/DiagnosticReports on 2026-08-02 and 2026-08-03.
+  // The prober originally logged replace_clip as "WEDGES"; that understated it. The bridge went
+  // quiet because the HOST PROCESS HAD DIED, not because the panel stopped listening.
+  replace_clip: "💀 CRASHES Premiere (SIGABRT, null-ptr panic) — verified via crash report",
+  reverse_clip: "💀 CRASHES Premiere (SIGABRT, null-ptr panic) — verified via crash report",
 
   // These swap or close the project out from under the run. Catastrophic mid-probe: every
   // subsequent write would land somewhere unintended, possibly in Sam's real project.
@@ -103,9 +107,20 @@ export const WITNESSED = new Set([
   "seqinout",
   "project",    // project item count, sequence count
   "srcmonitor", // which item is loaded
+  "clipprops",  // Motion/Opacity PROPERTY VALUES per clip (added 2026-08-03)
+  "seqsettings",// sequence settings block (added 2026-08-03)
+  "workarea",   // work area, zero point, sequence in/out
 ]);
 
 const DOMAIN_RULES = [
+  // Newly witnessed once the snapshot started capturing property values and sequence settings.
+  [/^(set_clip_(opacity|scale|position|rotation|anchor_point|properties|start_time)|set_uniform_scale|set_scale_|set_blend_mode|set_anti_alias_quality)/, "clipprops"],
+  [/^(set_sequence_(settings|resolution|frame_rate|field_type|display_format|audio_settings|pixel_aspect_ratio)|set_override_|set_graphics_white_luminance)/, "seqsettings"],
+  [/^(set_work_area|set_zero_point|set_start_time|set_sequence_in_out_points)/, "workarea"],
+  // Explicitly NOT witnessed: the snapshot records which item is in the source monitor, not its
+  // in/out points, and footage interpretation lives on the project item.
+  [/^set_source_in_out/, "srcinout"],
+  [/^set_footage_interpretation/, "media"],
   [/^(export_|encode_|capture_frame|verify_delivery|add_to_render_queue|start_batch_encode)/, "filesystem"],
   [/^(play_|stop_playback|set_playhead|move_playhead|match_frame)/, "playback"],
   [/(select|selection)/, "selection"],

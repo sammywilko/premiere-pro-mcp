@@ -34,7 +34,16 @@ const OUT_DIR = join(ROOT, "probe-results");
 const { buildToolScript } = await import(pathToFileURL(join(ROOT, "dist/bridge/script-builder.js")).href);
 const { sendCommand, getTempDir } = await import(pathToFileURL(join(ROOT, "dist/bridge/file-bridge.js")).href);
 
+import { execSync } from "node:child_process";
 import { classify, enabledTiers, TIER, DENY, isWitnessed, witnessDomain } from "./classify.mjs";
+
+/** Is the Premiere host process still alive? Distinguishes a crashed host from a wedged panel. */
+function premiereRunning() {
+  try {
+    const out = execSync("pgrep -fl 'Adobe Premiere Pro' 2>/dev/null || true", { encoding: "utf8" });
+    return /Adobe Premiere Pro/.test(out);
+  } catch { return false; }
+}
 
 /** Sam's real assembly. The prober must never be pointed at it, and must prove it survived. */
 const PROTECTED_SEQUENCE_ID = "bdda4d9d-76a9-4cf1-ab26-44b5ce57e349";
@@ -113,8 +122,21 @@ function digest(track) {
     var sp = 1; try { sp = k.getSpeed(); } catch (e) {}
     var nComp = -1; try { nComp = k.components ? k.components.numItems : -1; } catch (e) {}
     var nMark = -1; try { nMark = k.markers ? k.markers.numMarkers : -1; } catch (e) {}
+    // PROPERTY VALUES, not just component identity. Without these the entire set_clip_* family
+    // (opacity, scale, position, rotation, anchor point, uniform scale, blend mode) changes
+    // nothing the snapshot can see, so a working tool scores LIES. Second time this exact
+    // blind-spot class produced a wall of false accusations — measured 2026-08-03.
     var comps = ""; try {
-      for (var q = 0; q < k.components.numItems; q++) comps += k.components[q].matchName + ",";
+      for (var q = 0; q < k.components.numItems; q++) {
+        var comp = k.components[q];
+        comps += comp.matchName + "{";
+        for (var pi = 0; pi < comp.properties.numItems; pi++) {
+          var pr = comp.properties[pi];
+          var pv = "?"; try { pv = String(pr.getValue()); } catch (e2) {}
+          comps += pi + "=" + pv + ",";
+        }
+        comps += "}";
+      }
     } catch (e) {}
     s.push(k.nodeId + "|" + k.name + "|" + k.start.ticks + "|" + k.end.ticks + "|" +
            k.inPoint.ticks + "|" + k.outPoint.ticks + "|" + (k.disabled ? 0 : 1) + "|" + sp +
@@ -130,6 +152,18 @@ if (seq) {
   try { out.seqMarkers = seq.markers.numMarkers; } catch (e) {}
   try { out.seqIn = String(seq.getInPointAsTime().ticks); } catch (e) {}
   try { out.seqOut = String(seq.getOutPointAsTime().ticks); } catch (e) {}
+  // Sequence settings, so the whole set_sequence_* family becomes witnessed rather than
+  // scoring LIES for changing something the snapshot never looked at.
+  try {
+    var st = seq.getSettings();
+    out.seqSettings = [st.videoFrameRate ? String(st.videoFrameRate.ticks) : "?",
+                       st.videoFrameWidth, st.videoFrameHeight,
+                       st.videoPixelAspectRatio, st.videoFieldType,
+                       st.videoDisplayFormat, st.audioDisplayFormat,
+                       st.audioSampleRate ? String(st.audioSampleRate.ticks) : "?"].join("|");
+  } catch (e) { out.seqSettings = "unreadable"; }
+  try { out.workArea = String(seq.getWorkAreaInPointAsTime().ticks) + "-" + String(seq.getWorkAreaOutPointAsTime().ticks); } catch (e) {}
+  try { out.zeroPoint = String(seq.zeroPoint); } catch (e) {}
 }
 try {
   var sm = app.sourceMonitor.getProjectItem();
@@ -431,8 +465,25 @@ async function main() {
     if (post?.__error) {
       const still = await ping();
       if (!still) {
-        appendFileSync(JOURNAL, JSON.stringify({ tool: name, module: t.module, tier, verdict: "WEDGES", why: "bridge stopped responding after this call", args, at: new Date().toISOString() }) + "\n");
-        console.error(`\n🛑 BRIDGE WEDGED on ${name}. Recorded. Recover: Premiere > Window > Extensions > MCP Bridge, then re-run with --resume.`);
+        // A dead bridge has two very different causes and they need different names.
+        // WEDGES = the CEP panel stopped answering but Premiere is alive; a human clicks
+        //          Window > Extensions > MCP Bridge and work resumes.
+        // CRASHES = Premiere itself is GONE. Strictly worse, and it is what actually happened
+        //          with replace_clip (2026-08-02) and reverse_clip (2026-08-03) — both left an
+        //          identical SIGABRT / DoThrowNullPtrException report in DiagnosticReports,
+        //          while the prober called them both "wedged" and understated the severity.
+        const hostAlive = premiereRunning();
+        const verdict = hostAlive ? "WEDGES" : "CRASHES";
+        appendFileSync(JOURNAL, JSON.stringify({
+          tool: name, module: t.module, tier, verdict, args,
+          why: hostAlive
+            ? "bridge stopped responding; Premiere still running (panel wedged)"
+            : "PREMIERE PROCESS IS GONE — this call crashed the host application",
+          at: new Date().toISOString(),
+        }) + "\n");
+        console.error(hostAlive
+          ? `\n🛑 BRIDGE WEDGED on ${name}. Recover: Premiere > Window > Extensions > MCP Bridge, then --resume.`
+          : `\n💀 PREMIERE CRASHED on ${name}. Add it to DENY in classify.mjs before probing again.\n   Check ~/Library/Logs/DiagnosticReports for the report.`);
         wedged = true;
         break;
       }

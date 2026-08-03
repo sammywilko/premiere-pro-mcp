@@ -63,7 +63,7 @@ for (const r of Object.values(rows)) {
   }
 }
 
-const ORDER = ["WORKS", "FABRICATES", "ERRORED_BUT_MUTATED", "READ_MUTATES", "WEDGES", "NOOP_REPORTED_OK",
+const ORDER = ["WORKS", "CRASHES", "FABRICATES", "ERRORED_BUT_MUTATED", "READ_MUTATES", "WEDGES", "NOOP_REPORTED_OK",
                "UNWITNESSED", "HONEST_ERROR", "THREW", "UNKNOWN", "UNTESTABLE", "HALTED", "SKIPPED"];
 const byVerdict = {};
 for (const r of Object.values(rows)) (byVerdict[r.verdict] ||= []).push(r);
@@ -104,7 +104,8 @@ const MEANS = {
   NOOP_REPORTED_OK: "returned success for a no-op; payload honestly reports zero",
   ERRORED_BUT_MUTATED: "🔥 returned an error **after** changing the timeline — partial mutation, unrecoverable here",
   READ_MUTATES: "🚨 a read-only tool changed state",
-  WEDGES: "🛑 killed the CEP bridge; recovery is a manual step in Premiere",
+  CRASHES: "💀 **took Premiere down** — SIGABRT null-pointer panic in the host application",
+  WEDGES: "🛑 killed the CEP bridge but Premiere survived; recovery is a manual step",
   UNWITNESSED: "reported success in a domain the snapshot does not observe — **unknown, not broken**",
   HONEST_ERROR: "refused with an error and changed nothing (often just a fixture the prober couldn't supply)",
   THREW: "the handler itself threw before reaching Premiere",
@@ -116,7 +117,7 @@ const MEANS = {
 for (const v of ORDER) if (byVerdict[v]) L.push(`| ${v} | ${byVerdict[v].length} | ${MEANS[v]} |`);
 L.push("");
 
-for (const v of ["FABRICATES", "ERRORED_BUT_MUTATED", "READ_MUTATES", "WEDGES", "NOOP_REPORTED_OK"]) {
+for (const v of ["CRASHES", "FABRICATES", "ERRORED_BUT_MUTATED", "READ_MUTATES", "WEDGES", "NOOP_REPORTED_OK"]) {
   if (!byVerdict[v]?.length) continue;
   L.push(`## ${v}`);
   L.push("");
