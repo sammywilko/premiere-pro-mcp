@@ -93,6 +93,41 @@ async function observe(code) {
   }
 }
 
+/**
+ * Rebuild the scratch timeline in place after a tool empties it.
+ *
+ * Selection tools run before destructive ones alphabetically, so select_all_clips followed by
+ * remove_selected_clips reliably wipes the fixture mid-run. Halting there is safe but makes the
+ * prober need a human every few dozen tools, which no autonomous loop can use.
+ *
+ * Rebuilds INTO the existing sequence with insertClip rather than re-importing the seed XML:
+ * a re-import would create a SECOND sequence with the same name, and every name-based lookup
+ * after that — including the prober's own scratch guard — becomes ambiguous.
+ */
+async function reseedScratch(count = 3) {
+  const r = await observe(`
+    var seq = app.project.activeSequence;
+    if (!seq) return __error("no active sequence");
+    function firstMedia(bin) {
+      for (var i = 0; i < bin.children.numItems; i++) {
+        var it = bin.children[i];
+        if (it.type === 2) { var f = firstMedia(it); if (f) return f; }
+        else if (it.getMediaPath && it.getMediaPath() && it.getMediaPath().length) return it;
+      }
+      return null;
+    }
+    var item = firstMedia(app.project.rootItem);
+    if (!item) return __error("no media item available to reseed from");
+    for (var n = 0; n < ${count}; n++) {
+      try { seq.insertClip(item, "0", 0, 0); } catch (e) {}
+    }
+    var got = seq.videoTracks[0].clips.numItems;
+    return __result({ clips: got, item: item.name });
+  `);
+  if (r.__error || !r.clips) return null;
+  return r;
+}
+
 async function ping() {
   const d = await observe(`return __result({ ok: true, seq: app.project.activeSequence ? app.project.activeSequence.name : null, project: app.project.name });`);
   return d && !d.__error ? d : null;
@@ -254,10 +289,15 @@ function valueFor(propName, spec, fx) {
     track_type: "video", media_type: "video",
     time_seconds: 1, start_seconds: 0, end_seconds: 2, position_seconds: 1, offset_seconds: 0.2,
     in_seconds: 0, out_seconds: 2, duration_seconds: 1, new_start_seconds: 0,
-    speed_percent: 100, opacity: 100, volume: 0, scale: 100, value: 50,
+    // Setter fixtures MUST differ from Premiere's defaults, or the call is a genuine no-op and
+    // "reported success, nothing changed" becomes indistinguishable from a lie. opacity:100 on a
+    // clip already at 100, scale:100 on a clip already at 100 and speed_percent:100 on an
+    // unretimed clip produced a whole wave of false LIES verdicts on 2026-08-03.
+    speed_percent: 50, opacity: 42, volume: -6, scale: 75, value: 42,
     effect_name: "Gaussian Blur", transition_name: "Cross Dissolve", property_name: "Blur",
     name: "PROBE_TMP", new_name: "PROBE_TMP", bin_name: "PROBE_TMP_BIN", comments: "probe",
-    enabled: true, reverse: false, ripple: false, selected_only: false, suppress_ui: true,
+    enabled: false, reverse: true, ripple: false, selected_only: false, suppress_ui: true,
+    rotation: 15, uniform_scale: false, interpolation_type: 1, blend_mode: 3, opacity_percent: 42,
     file_paths: fx.mediaPath ? [fx.mediaPath] : [],
     path: fx.mediaPath, file_path: fx.mediaPath, media_path: fx.mediaPath,
     output_path: join(fx.outDir, `probe_${propName}.png`),
@@ -265,6 +305,11 @@ function valueFor(propName, spec, fx) {
     node_ids: fx.nodeId ? [fx.nodeId] : [],
     count: 1, color_index: 1, width: 1920, height: 1080, frame_rate: 25, sample_rate: 48000,
   };
+  // Identifier-shaped params must come from a live fixture or not at all. Falling through to
+  // the generic string default sent node_id:"PROBE_TMP" to 20+ tools, each of which honestly
+  // answered "Clip not found" — verdicts that look like data and mean nothing.
+  const IDENTITY = /^(node_id|.*_node_id|item_id|.*_item_id|clip_index|bin_id|sequence_id|item_ids|node_ids)$/;
+  if (IDENTITY.test(n)) return (n in byName) ? byName[n] : null;
   if (n in byName && byName[n] !== undefined && byName[n] !== null) return byName[n];
   if (spec?.enum?.length) return spec.enum[0];
   if (spec?.default !== undefined) return spec.default;
@@ -430,16 +475,27 @@ async function main() {
     // from the snapshot we already took (free) and halt loudly if the scratch is exhausted.
     if (!pre.__error) {
       const liveIds = (pre.v || []).join(";");
-      if (fx.nodeId && !liveIds.includes(fx.nodeId)) {
+      if (!fx.nodeId || !liveIds.includes(fx.nodeId)) {
         const first = (pre.v || []).find((d) => d.length > 0);
         const newId = first ? first.split("|")[0] : null;
         if (!newId) {
-          console.error(`\n🛑 SCRATCH EXHAUSTED before ${name}: no clips left on any video track.\nRe-seed "${SCRATCH}" (re-import the probe XML), then re-run with --resume.`);
-          appendFileSync(JOURNAL, JSON.stringify({ tool: name, module: t.module, tier, verdict: "HALTED", why: "scratch sequence had no clips left", at: new Date().toISOString() }) + "\n");
-          break;
+          console.log(`      ↻ scratch empty — rebuilding before ${name}`);
+          const seeded = await reseedScratch();
+          if (!seeded) {
+            console.error(`\n🛑 SCRATCH EXHAUSTED before ${name} and could not be rebuilt automatically.\nRe-seed "${SCRATCH}" by hand, then re-run with --resume.`);
+            appendFileSync(JOURNAL, JSON.stringify({ tool: name, module: t.module, tier, verdict: "HALTED", why: "scratch had no clips and auto-reseed failed", at: new Date().toISOString() }) + "\n");
+            break;
+          }
+          const fresh = await snapshot();
+          if (!fresh.__error) Object.assign(pre, fresh);
+          const firstFresh = (fresh.v || []).find((d) => d.length > 0);
+          fx.nodeId = firstFresh ? firstFresh.split("|")[0] : null;
+          console.log(`      ↻ rebuilt: ${seeded.clips} clip(s) from "${seeded.item}" -> fixture ${fx.nodeId}`);
+          if (!fx.nodeId) break;
+        } else {
+          fx.nodeId = newId;
+          console.log(`      ↻ fixture clip re-resolved -> ${newId}`);
         }
-        fx.nodeId = newId;
-        console.log(`      ↻ fixture clip re-resolved -> ${newId}`);
       }
     }
 

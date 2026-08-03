@@ -3,20 +3,20 @@
   "premiere": "26.5.0",
   "note": "Verdicts are judged by observing Premiere before/after, never by the tool's own report. UNWITNESSED means the prober could not see the tool's domain — it is 'unknown', not 'broken'.",
   "summary": {
-    "WORKS": 91,
-    "CRASHES": 1,
+    "WORKS": 100,
     "FABRICATES": 2,
-    "NOOP_REPORTED_OK": 1,
-    "UNWITNESSED": 26,
-    "HONEST_ERROR": 52,
+    "ERRORED_BUT_MUTATED": 1,
+    "NOOP_REPORTED_OK": 19,
+    "UNWITNESSED": 43,
+    "HONEST_ERROR": 73,
     "THREW": 3,
     "UNTESTABLE": 1,
-    "SKIPPED": 27
+    "SKIPPED": 39
   },
   "totals": {
-    "registered": 204,
-    "probed": 176,
-    "unprobed": 28
+    "registered": 281,
+    "probed": 241,
+    "unprobed": 40
   },
   "tools": {
     "add_adjustment_layer": {
@@ -58,7 +58,7 @@
       "domain": "projectitem",
       "tier": "T1_WRITE",
       "why": "reported success; changes to 'projectitem' are outside what the snapshot observes, so this is neither confirmed nor refuted",
-      "reported": "{\"success\":true,\"data\":{\"added\":true,\"item\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"timeSeconds\":1}}"
+      "reported": "{\"success\":true,\"data\":{\"added\":true,\"item\":\"NASA-AI_3371_VID_004-V1.mp4\",\"timeSeconds\":1}}"
     },
     "add_text_overlay": {
       "verdict": "HONEST_ERROR",
@@ -140,7 +140,7 @@
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "errored, world unchanged",
-      "reported": "{\"success\":false,\"error\":\"Refusing to act: video track 0 has 1 gap(s), 1 of them before the target clip, and QE reports 4 items — matching neither the DOM clip count (2) nor DOM+gaps (3). clipIndex is a DOM index, so handing it to QE could "
+      "reported": "{\"success\":false,\"error\":\"Could not apply Lumetri Color effect\"}"
     },
     "attach_custom_property": {
       "verdict": "UNWITNESSED",
@@ -202,7 +202,7 @@
       "domain": "projectitem",
       "tier": "T1_WRITE",
       "why": "reported success; changes to 'projectitem' are outside what the snapshot observes, so this is neither confirmed nor refuted",
-      "reported": "{\"success\":true,\"data\":{\"item\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"clearedIn\":true,\"clearedOut\":true}}"
+      "reported": "{\"success\":true,\"data\":{\"item\":\"NASA-AI_3371_VID_004-V1.mp4\",\"clearedIn\":true,\"clearedOut\":true}}"
     },
     "clear_sequence_in_out": {
       "verdict": "HONEST_ERROR",
@@ -308,7 +308,7 @@
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"id\":\"a2db7766-ba4d-482b-a772-cc842e1dc6e6\",\"clipCount\":1}}"
+      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"id\":\"eedfb241-dfff-46bd-bcec-eaf0eeb2f71e\",\"clipCount\":1}}"
     },
     "create_sequence_from_preset": {
       "verdict": "HONEST_ERROR",
@@ -329,7 +329,7 @@
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"source\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\"}}"
+      "reported": "{\"success\":true,\"data\":{\"created\":true,\"name\":\"PROBE_TMP\",\"source\":\"NASA-AI_3371_VID_004-V1.mp4\"}}"
     },
     "create_subsequence": {
       "verdict": "HONEST_ERROR",
@@ -387,7 +387,7 @@
       "domain": "selection",
       "tier": "T1_WRITE",
       "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
-      "reported": "{\"success\":true,\"data\":{\"deselected\":2}}"
+      "reported": "{\"success\":true,\"data\":{\"deselected\":3}}"
     },
     "detach_proxy": {
       "verdict": "SKIPPED",
@@ -468,7 +468,7 @@
       "domain": "filesystem",
       "tier": "T1_WRITE",
       "why": "reported success; changes to 'filesystem' are outside what the snapshot observes, so this is neither confirmed nor refuted",
-      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"outputPath\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\",\"method\":\"ame\"}}"
+      "reported": "{\"success\":true,\"data\":{\"exported\":true,\"outputPath\":\"/Users/samuelwilkinson/PROJECTS/premiere-pro-mcp/probe-results/artifacts/probe_output_path.png\",\"method\":\"qe\"}}"
     },
     "export_frame_uxp": {
       "verdict": "HONEST_ERROR",
@@ -1056,7 +1056,7 @@
       "domain": "selection",
       "tier": "T1_WRITE",
       "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
-      "reported": "{\"success\":true,\"data\":{\"nowSelected\":2,\"nowDeselected\":0}}"
+      "reported": "{\"success\":true,\"data\":{\"nowSelected\":3,\"nowDeselected\":0}}"
     },
     "is_work_area_enabled": {
       "verdict": "HONEST_ERROR",
@@ -1156,11 +1156,11 @@
       "why": "destroys project contents"
     },
     "match_frame": {
-      "verdict": "UNWITNESSED",
+      "verdict": "HONEST_ERROR",
       "domain": "playback",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'playback' are outside what the snapshot observes, so this is neither confirmed nor refuted",
-      "reported": "{\"success\":true,\"data\":{\"clipName\":\"PROBE_TMP\",\"clipNodeId\":\"000f443d\",\"timelineSeconds\":1,\"sourceSeconds\":1,\"sourceNodeId\":\"000f4388\",\"sourceName\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"sourceMediaPath\":\"/Users/samuelwilkinson/Downloads"
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"No clip at playhead on video track 0\"}"
     },
     "move_clip": {
       "verdict": "HONEST_ERROR",
@@ -1181,7 +1181,7 @@
       "domain": "bins",
       "tier": "T1_WRITE",
       "why": "reported success; changes to 'bins' are outside what the snapshot observes, so this is neither confirmed nor refuted",
-      "reported": "{\"success\":true,\"data\":{\"moved\":true,\"item\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"toBin\":\"PROBE_TMP\"}}"
+      "reported": "{\"success\":true,\"data\":{\"moved\":true,\"item\":\"NASA-AI_3371_VID_004-V1.mp4\",\"toBin\":\"PROBE_TMP\"}}"
     },
     "move_items_to_bin": {
       "verdict": "UNWITNESSED",
@@ -1191,11 +1191,11 @@
       "reported": "{\"success\":true,\"data\":{\"moved\":1,\"total\":1,\"targetBin\":\"PROBE_TMP\"}}"
     },
     "move_playhead_to_edit": {
-      "verdict": "UNWITNESSED",
+      "verdict": "HONEST_ERROR",
       "domain": "playback",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'playback' are outside what the snapshot observes, so this is neither confirmed nor refuted",
-      "reported": "{\"success\":true,\"data\":{\"movedTo\":3,\"direction\":\"next\"}}"
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"No next edit point found\"}"
     },
     "multiple_undo": {
       "verdict": "SKIPPED",
@@ -1289,7 +1289,7 @@
       "domain": "media",
       "tier": "T1_WRITE",
       "why": "reported success; changes to 'media' are outside what the snapshot observes, so this is neither confirmed nor refuted",
-      "reported": "{\"success\":true,\"data\":{\"refreshed\":true,\"item\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\"}}"
+      "reported": "{\"success\":true,\"data\":{\"refreshed\":true,\"item\":\"NASA-AI_3371_VID_004-V1.mp4\"}}"
     },
     "relink_media": {
       "verdict": "SKIPPED",
@@ -1340,11 +1340,11 @@
       "reported": "{\"success\":false,\"error\":\"Effect not found\"}"
     },
     "remove_selected_clips": {
-      "verdict": "UNWITNESSED",
+      "verdict": "WORKS",
       "domain": "selection",
       "tier": "T1_WRITE",
-      "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
-      "reported": "{\"success\":true,\"data\":{\"removed\":0,\"ripple\":false}}"
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"removed\":2,\"ripple\":false}}"
     },
     "rename_bin": {
       "verdict": "HONEST_ERROR",
@@ -1358,14 +1358,14 @@
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"renamed\":true,\"oldName\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"newName\":\"PROBE_TMP\"}}"
+      "reported": "{\"success\":true,\"data\":{\"renamed\":true,\"oldName\":\"NASA-AI_3371_VID_004-V1.mp4\",\"newName\":\"PROBE_TMP\"}}"
     },
     "rename_project_item": {
       "verdict": "WORKS",
       "domain": "timeline",
       "tier": "T1_WRITE",
       "why": "reported success and the world moved",
-      "reported": "{\"success\":true,\"data\":{\"oldName\":\"SPGFX02B-02_VID_021-V1_SQ02-SC01-A.mp4\",\"newName\":\"PROBE_TMP\"}}"
+      "reported": "{\"success\":true,\"data\":{\"oldName\":\"NASA-AI_3371_VID_004-V1.mp4\",\"newName\":\"PROBE_TMP\"}}"
     },
     "rename_track": {
       "verdict": "UNWITNESSED",
@@ -1378,7 +1378,7 @@
       "verdict": "SKIPPED",
       "domain": "timeline",
       "tier": "DENY",
-      "why": "wedges the CEP bridge (observed); recovery is manual"
+      "why": "💀 CRASHES Premiere (SIGABRT, null-ptr panic) — verified via crash report"
     },
     "replace_clip_media": {
       "verdict": "SKIPPED",
@@ -1387,10 +1387,42 @@
       "why": "destroys project contents"
     },
     "reverse_clip": {
-      "verdict": "CRASHES",
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "DENY",
+      "why": "💀 CRASHES Premiere (SIGABRT, null-ptr panic) — verified via crash report"
+    },
+    "ripple_delete": {
+      "verdict": "HONEST_ERROR",
       "domain": "timeline",
       "tier": "T1_WRITE",
-      "why": "PREMIERE PROCESS DIED — SIGABRT / DoThrowNullPtrException (crash report confirmed); originally mislabelled WEDGES"
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Premiere reported rippleDelete but the clip is still present. Structural QE edits are known to no-op on some Premiere Pro 26.3 installations; rebuild the keep-segments into a new sequence as a workaround.\"}"
+    },
+    "roll_edit": {
+      "verdict": "ERRORED_BUT_MUTATED",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "returned an error AFTER changing the timeline — partial mutation, unrecoverable here",
+      "reported": "{\"success\":false,\"error\":\"roll_edit MUTATED THE TIMELINE BUT NOT AS REQUESTED via 'ticks+0+0+0': target clip's end moved 69600s, requested 0.2s. The clip was NOT restored (QE offers no inverse for this call) — inspect and fix by hand. Tried"
+    },
+    "save_project": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "DENY",
+      "why": "writes probe scratch sequences into Sam's project file on disk; saving is his call"
+    },
+    "save_project_as": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "DENY",
+      "why": "forks the project file, switching the active one"
+    },
+    "scene_edit_detection": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "T3_SLOW",
+      "why": "slow / invokes AME"
     },
     "search_project_items": {
       "verdict": "WORKS",
@@ -1398,6 +1430,500 @@
       "tier": "T0_READ",
       "why": "returned data, world unchanged",
       "reported": "{\"success\":true,\"data\":{\"resultCount\":100,\"maxResults\":100,\"items\":[{\"nodeId\":\"000f4386\",\"name\":\"Higgsfield\",\"type\":\"file\",\"treePath\":\"\\\\NEW PROJECT.prproj\\\\Higgsfield\",\"mediaPath\":\"\",\"offline\":false,\"colorLabel\":7},{\"nodeId\":\"000f4241\",\"na"
+    },
+    "select_all_clips": {
+      "verdict": "UNWITNESSED",
+      "domain": "selection",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"selected\":3}}"
+    },
+    "select_clips_by_color": {
+      "verdict": "UNWITNESSED",
+      "domain": "selection",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"selected\":0,\"colorIndex\":1}}"
+    },
+    "select_clips_by_name": {
+      "verdict": "UNWITNESSED",
+      "domain": "selection",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"selected\":1,\"query\":\"PROBE_TMP\"}}"
+    },
+    "select_clips_in_range": {
+      "verdict": "UNWITNESSED",
+      "domain": "selection",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"selected\":1,\"rangeStart\":0,\"rangeEnd\":2}}"
+    },
+    "select_disabled_clips": {
+      "verdict": "UNWITNESSED",
+      "domain": "selection",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"selected\":0}}"
+    },
+    "select_item": {
+      "verdict": "UNWITNESSED",
+      "domain": "selection",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"selected\":true,\"item\":\"PROBE_TMP\"}}"
+    },
+    "set_active_sequence": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"active\":true,\"name\":\"PROBE-SCRATCH\",\"id\":\"080bc1b6-4cbf-44fe-977e-23fc3180c31c\"}}"
+    },
+    "set_all_tracks_targeted": {
+      "verdict": "UNWITNESSED",
+      "domain": "trackprops",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'trackprops' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"tracksAffected\":2,\"targeted\":false}}"
+    },
+    "set_anti_alias_quality": {
+      "verdict": "HONEST_ERROR",
+      "domain": "clipprops",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Error: Illegal Parameter type\"}"
+    },
+    "set_blend_mode": {
+      "verdict": "HONEST_ERROR",
+      "domain": "clipprops",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged"
+    },
+    "set_clip_anchor_point": {
+      "verdict": "WORKS",
+      "domain": "clipprops",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"x\":1,\"y\":1,\"clip\":\"NASA-AI_3371_VID_004-V1.mp4\"}}"
+    },
+    "set_clip_opacity": {
+      "verdict": "WORKS",
+      "domain": "clipprops",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"opacity\":42,\"clip\":\"NASA-AI_3371_VID_004-V1.mp4\"}}"
+    },
+    "set_clip_pan": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Could not set pan - is this an audio clip?\"}"
+    },
+    "set_clip_position": {
+      "verdict": "WORKS",
+      "domain": "clipprops",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"x\":1,\"y\":1,\"clip\":\"NASA-AI_3371_VID_004-V1.mp4\"}}"
+    },
+    "set_clip_properties": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "clipprops",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"updated\":true,\"clipName\":\"NASA-AI_3371_VID_004-V1.mp4\",\"changes\":{}}}"
+    },
+    "set_clip_rotation": {
+      "verdict": "WORKS",
+      "domain": "clipprops",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"degrees\":1,\"clip\":\"NASA-AI_3371_VID_004-V1.mp4\"}}"
+    },
+    "set_clip_scale": {
+      "verdict": "WORKS",
+      "domain": "clipprops",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"scale\":75,\"clip\":\"NASA-AI_3371_VID_004-V1.mp4\"}}"
+    },
+    "set_clip_selection": {
+      "verdict": "UNWITNESSED",
+      "domain": "selection",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"selected\":false,\"clipName\":\"NASA-AI_3371_VID_004-V1.mp4\"}}"
+    },
+    "set_clip_speed_qe": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Refusing to act: video track 0 has 2 gap(s), 1 of them before the target clip, and QE reports 6 items — matching neither the DOM clip count (3) nor DOM+gaps (5). clipIndex is a DOM index, so handing it to QE could "
+    },
+    "set_clip_start_time": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "clipprops",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"item\":\"NASA-AI_3369_VID_005-V1.mp4\",\"startSeconds\":0}}"
+    },
+    "set_clip_volume": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Could not set volume - is this an audio clip?\"}"
+    },
+    "set_color_label": {
+      "verdict": "UNWITNESSED",
+      "domain": "metadata",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'metadata' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"updated\":true,\"item\":\"PROBE_TMP\",\"colorIndex\":1}}"
+    },
+    "set_color_value": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Component not found\"}"
+    },
+    "set_effect_property": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Effect not found: Gaussian Blur\"}"
+    },
+    "set_footage_interpretation": {
+      "verdict": "UNWITNESSED",
+      "domain": "media",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'media' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"updated\":true,\"item\":\"PROBE_TMP\"}}"
+    },
+    "set_frame_blend": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Refusing to act: video track 0 has 2 gap(s), 1 of them before the target clip, and QE reports 6 items — matching neither the DOM clip count (3) nor DOM+gaps (5). clipIndex is a DOM index, so handing it to QE could "
+    },
+    "set_graphics_white_luminance": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "seqsettings",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"set\":true,\"graphicsWhiteLuminance\":1}}"
+    },
+    "set_item_in_out": {
+      "verdict": "UNWITNESSED",
+      "domain": "projectitem",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'projectitem' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"item\":\"PROBE_TMP\",\"inSet\":false,\"outSet\":false}}"
+    },
+    "set_keyframe_interpolation": {
+      "verdict": "HONEST_ERROR",
+      "domain": "keyframes",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Effect not found\"}"
+    },
+    "set_metadata": {
+      "verdict": "HONEST_ERROR",
+      "domain": "metadata",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged"
+    },
+    "set_offline": {
+      "verdict": "SKIPPED",
+      "domain": "media",
+      "tier": "T2_DESTRUCTIVE",
+      "why": "destroys project contents"
+    },
+    "set_override_frame_rate": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "seqsettings",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"set\":true,\"item\":\"STRU-AI_2922_VID_001-V1_SQ09-SC01-A.mp4\",\"frameRate\":25}}"
+    },
+    "set_override_pixel_aspect_ratio": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "seqsettings",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"set\":true,\"item\":\"STRU-AI_2922_VID_001-V1_SQ09-SC01-A.mp4\",\"par\":\"1:1\"}}"
+    },
+    "set_playhead_position": {
+      "verdict": "UNWITNESSED",
+      "domain": "playback",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'playback' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"positionSeconds\":1}}"
+    },
+    "set_poster_frame": {
+      "verdict": "UNWITNESSED",
+      "domain": "metadata",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'metadata' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"item\":\"PROBE_TMP\",\"timeSeconds\":1,\"note\":\"Poster frame set attempt - may require UI interaction\"}}"
+    },
+    "set_project_item_audio_channel_mapping": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Premiere rejected this channel mapping\"}"
+    },
+    "set_project_panel_metadata": {
+      "verdict": "UNWITNESSED",
+      "domain": "metadata",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'metadata' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"set\":true}}"
+    },
+    "set_project_scratch_disk": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "DENY",
+      "why": "mutates global scratch settings"
+    },
+    "set_scale_to_frame_size": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "clipprops",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"set\":true,\"item\":\"NASA-AI_3369_VID_005-V1.mp4\"}}"
+    },
+    "set_scale_width_height": {
+      "verdict": "WORKS",
+      "domain": "clipprops",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"clip\":\"NASA-AI_3371_VID_004-V1.mp4\",\"scaleWidth\":1,\"scaleHeight\":1,\"widthSet\":true,\"heightSet\":false}}"
+    },
+    "set_scratch_disk_path": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "DENY",
+      "why": "mutates global app preferences"
+    },
+    "set_sequence_audio_settings": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "seqsettings",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"sequence\":\"PROBE-SCRATCH\",\"sampleRate\":{\"seconds\":0.00002083333333,\"ticks\":\"5292000\"},\"channelType\":1}}"
+    },
+    "set_sequence_display_format": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "seqsettings",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"sequence\":\"PROBE-SCRATCH\",\"videoDisplayFormat\":101,\"audioDisplayFormat\":200}}"
+    },
+    "set_sequence_field_type": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "seqsettings",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"fieldType\":1,\"sequence\":\"PROBE-SCRATCH\"}}"
+    },
+    "set_sequence_frame_rate": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "seqsettings",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"frameRate\":25,\"ticksPerFrame\":\"10160640000\",\"sequence\":\"PROBE-SCRATCH\"}}"
+    },
+    "set_sequence_in_out_points": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "workarea",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"inSeconds\":0,\"outSeconds\":2}}"
+    },
+    "set_sequence_pixel_aspect_ratio": {
+      "verdict": "HONEST_ERROR",
+      "domain": "seqsettings",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Error: Illegal Parameter type\"}"
+    },
+    "set_sequence_resolution": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "seqsettings",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"width\":1920,\"height\":1080,\"sequence\":\"PROBE-SCRATCH\"}}"
+    },
+    "set_sequence_settings": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "seqsettings",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"updated\":true,\"name\":\"PROBE-SCRATCH\"}}"
+    },
+    "set_source_in_out": {
+      "verdict": "UNWITNESSED",
+      "domain": "srcinout",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'srcinout' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"item\":\"ABDN-AI_8814_VIDEO_SQ07-SC83-H_AI-025-V1.mp4\",\"inSet\":false,\"outSet\":false}}"
+    },
+    "set_start_time": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "workarea",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"set\":true,\"item\":\"STRU-AI_2922_VID_001-V1_SQ09-SC01-A.mp4\",\"startSeconds\":0}}"
+    },
+    "set_target_track": {
+      "verdict": "UNWITNESSED",
+      "domain": "trackprops",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'trackprops' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"trackType\":\"video\",\"trackIndex\":0,\"trackName\":\"PROBE_TMP\",\"targeted\":false}}"
+    },
+    "set_time_interpolation": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Refusing to act: video track 0 has 2 gap(s), 1 of them before the target clip, and QE reports 6 items — matching neither the DOM clip count (3) nor DOM+gaps (5). clipIndex is a DOM index, so handing it to QE could "
+    },
+    "set_transcode_on_ingest": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "DENY",
+      "why": "mutates global ingest preferences"
+    },
+    "set_uniform_scale": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "clipprops",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"clip\":\"NASA-AI_3371_VID_004-V1.mp4\",\"uniformScale\":false}}"
+    },
+    "set_work_area": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "workarea",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"workAreaIn\":0,\"workAreaOut\":2}}"
+    },
+    "set_workspace": {
+      "verdict": "SKIPPED",
+      "domain": "ui",
+      "tier": "DENY",
+      "why": "rearranges Sam's actual UI layout"
+    },
+    "set_xmp_metadata": {
+      "verdict": "UNWITNESSED",
+      "domain": "metadata",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'metadata' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"updated\":true,\"item\":\"PROBE_TMP\"}}"
+    },
+    "set_zero_point": {
+      "verdict": "NOOP_REPORTED_OK",
+      "domain": "workarea",
+      "tier": "T1_WRITE",
+      "why": "returned success for a no-op; its payload is honest about having done nothing",
+      "reported": "{\"success\":true,\"data\":{\"set\":true,\"startSeconds\":0}}"
+    },
+    "slide_edit": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"slid\":true,\"clipName\":\"PROBE_TMP\",\"offsetSeconds\":0.2}}"
+    },
+    "slip_edit": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Refusing to act: video track 0 has 1 gap(s), 1 of them before the target clip, and QE reports 5 items — matching neither the DOM clip count (3) nor DOM+gaps (4). clipIndex is a DOM index, so handing it to QE could "
+    },
+    "speed_change": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Refusing to act: video track 0 has 1 gap(s), 1 of them before the target clip, and QE reports 5 items — matching neither the DOM clip count (3) nor DOM+gaps (4). clipIndex is a DOM index, so handing it to QE could "
+    },
+    "split_clip": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"Premiere reported razor but the track clip count did not change. Structural QE edits are known to no-op on some Premiere Pro 26.3 installations.\"}"
+    },
+    "stabilize_clip": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "T3_SLOW",
+      "why": "slow / invokes AME"
+    },
+    "start_batch_encode": {
+      "verdict": "SKIPPED",
+      "domain": "filesystem",
+      "tier": "T3_SLOW",
+      "why": "slow / invokes AME"
+    },
+    "stop_playback": {
+      "verdict": "UNWITNESSED",
+      "domain": "playback",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'playback' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"stopped\":true}}"
+    },
+    "toggle_track_visibility": {
+      "verdict": "UNWITNESSED",
+      "domain": "trackprops",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'trackprops' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"trackIndex\":0,\"visible\":false,\"trackName\":\"PROBE_TMP\"}}"
+    },
+    "trim_clip": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"trim wrote nothing — neither the source range nor the timeline footprint changed.\"}"
+    },
+    "undo": {
+      "verdict": "SKIPPED",
+      "domain": "timeline",
+      "tier": "DENY",
+      "why": "rewinds probe-applied state; corrupts the world model"
+    },
+    "unlink_selection": {
+      "verdict": "UNWITNESSED",
+      "domain": "selection",
+      "tier": "T1_WRITE",
+      "why": "reported success; changes to 'selection' are outside what the snapshot observes, so this is neither confirmed nor refuted",
+      "reported": "{\"success\":true,\"data\":{\"unlinked\":true}}"
+    },
+    "unnest_sequence": {
+      "verdict": "WORKS",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "reported success and the world moved",
+      "reported": "{\"success\":true,\"data\":{\"unnested\":true,\"nestedSequence\":\"PROBE_TMP\",\"clipsAdded\":1,\"clips\":[\"a3b80439-7829-4cb1-86af-f942819e7218-b9ab5f948d.png\"]}}"
+    },
+    "update_marker": {
+      "verdict": "HONEST_ERROR",
+      "domain": "timeline",
+      "tier": "T1_WRITE",
+      "why": "errored, world unchanged",
+      "reported": "{\"success\":false,\"error\":\"No marker found at 1s\"}"
     },
     "validate_export_preset": {
       "verdict": "HONEST_ERROR",
